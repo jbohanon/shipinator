@@ -1,0 +1,3 @@
+build:
+  steps:
+    - run: make build
