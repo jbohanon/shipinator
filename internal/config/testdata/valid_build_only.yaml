@@ -1,0 +1,7 @@
+build:
+  steps:
+    - name: compile
+      run: go build -o bin/app ./cmd/app
+      outputs:
+        - type: binary
+          path: bin/app

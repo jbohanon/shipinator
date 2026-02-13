@@ -1,0 +1,28 @@
+build:
+  steps:
+    - name: go-build
+      run: make build
+      outputs:
+        - type: binary
+          path: bin/app
+    - name: image
+      run: make image
+      outputs:
+        - type: oci_image
+          ref: "myapp:latest"
+
+test:
+  steps:
+    - name: unit
+      run: go test ./... -coverprofile=coverage.out
+      artifacts:
+        - type: coverage
+          path: coverage.out
+    - name: helm-lint
+      run: helm lint charts/*
+      parallel: true
+
+deploy:
+  artifact: helm_chart
+  target: local
+  namespace: default

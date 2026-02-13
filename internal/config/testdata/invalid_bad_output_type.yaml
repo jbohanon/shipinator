@@ -1,0 +1,7 @@
+build:
+  steps:
+    - name: build
+      run: make build
+      outputs:
+        - type: invalid_type
+          path: bin/app
