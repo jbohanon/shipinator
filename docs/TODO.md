@@ -2,15 +2,15 @@
 
 ## Phase 1: Foundation & Configuration
 
-1. **Define the `.shipinator.yaml` schema as Go types** — Create a `config` package with structs for `BuildConfig`, `TestConfig`, `DeployConfig`, and their nested step/output types. Write a `Load()` function that parses YAML into these structs. Write tests with sample YAML files.
+1. ~~**Define the `.shipinator.yaml` schema as Go types** — Create a `config` package with structs for `BuildConfig`, `TestConfig`, `DeployConfig`, and their nested step/output types. Write a `Load()` function that parses YAML into these structs. Write tests with sample YAML files.~~ ✅
 
-2. **Set up server configuration** — Implement server-level config (listen address, DB connection string, artifact store path, k8s config). Use a library like `envconfig` or `koanf`, or keep it simple with env vars. Wire it into `cmd/server/main.go`.
+2. ~~**Set up server configuration** — Implement server-level config (listen address, DB connection string, artifact store path, k8s config). Use viper with YAML files and `SHIPINATOR_*` env var overrides. Nested `DBConfig` struct with individual fields (host, port, user, password, name, ssl_mode). Wired into `cmd/server/main.go`.~~ ✅
 
-3. **Choose and add dependencies** — Decide on your database driver (e.g. `pgx`), migration tool (e.g. `goose` or `golang-migrate`), HTTP router (e.g. `chi` or stdlib `net/http`), and UUID library. Run `go get` and get `go.mod`/`go.sum` populated.
+3. ~~**Choose and add dependencies** — Using `pgx` (via golibs/postgres), golibs migration runner, Echo v4 HTTP router, and `google/uuid`. All in `go.mod`/`go.sum`.~~ ✅
 
 ## Phase 2: Database & Data Model
 
-4. **Write SQL migrations** — Implement the full relational schema from the DMD: `projects`, `repositories`, `pipelines`, `pipeline_runs`, `jobs`, `job_steps`, `artifacts`, `executions`. Create migration files in order.
+4. ~~**Write SQL migrations** — Full relational schema from the DMD: `projects`, `repositories`, `pipelines`, `pipeline_runs`, `jobs`, `job_steps`, `artifacts`, `executions`. 8 migration files in `migrations/` with FK indexes, TIMESTAMPTZ, gen_random_uuid() PKs. Migration runner wired into server startup.~~ ✅
 
 5. **Implement repository layer** — Create a `store` or `db` package with Go interfaces and Postgres implementations for CRUD on each table. Start with `ProjectStore`, `RepositoryStore`, `PipelineStore`, etc. Write tests against a real or test database.
 
