@@ -18,9 +18,9 @@
 
 ## Phase 3: Domain Core — State Machines
 
-7. **Implement the Stage FSM** — Create an `fsm` or `orchestrator` package. Model the stage states: `PENDING -> RUNNING -> SUCCEEDED | FAILED`. Enforce valid transitions. Write thorough tests for every valid and invalid transition.
+~~7. **Implement the Stage FSM** — Create an `fsm` or `orchestrator` package. Model the stage states: `PENDING -> RUNNING -> SUCCEEDED | FAILED`. Enforce valid transitions. Write thorough tests for every valid and invalid transition.~~
 
-8. **Implement the Job/Pipeline Run FSM** — Model the pipeline run states: `PENDING -> RUNNING -> SUCCESS | FAILED | CANCELED`. Model how stage outcomes drive pipeline run transitions (e.g., stage FAILED -> pipeline run FAILED). Persist transitions via the store layer.
+~~8. **Implement the Job/Pipeline Run FSM** — Model the pipeline run states: `PENDING -> RUNNING -> SUCCESS | FAILED | CANCELED`. Model how stage outcomes drive pipeline run transitions (e.g., stage FAILED -> pipeline run FAILED). Persist transitions via the store layer.~~
 
 9. **Implement the Orchestrator** — This is the core coordinator. Given a pipeline run, it should: determine which stages to execute, advance the FSM through `BUILDING -> BUILT -> TESTING -> TESTED -> DEPLOYING -> DEPLOYED`, and react to stage completion callbacks. This drives everything but executes nothing.
 
