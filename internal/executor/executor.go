@@ -1,5 +1,7 @@
 package executor
 
+//go:generate go run go.uber.org/mock/mockgen -destination=mocks/mock_executor.go -package=mocks git.nonahob.net/jacob/shipinator/internal/executor Executor
+
 import (
 	"context"
 	"slices"

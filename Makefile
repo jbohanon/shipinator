@@ -1,4 +1,4 @@
-.PHONY: test lint build
+.PHONY: test lint build gen
 
 test:
 	go test ./...
@@ -6,5 +6,8 @@ test:
 lint:
 	golangci-lint run ./...
 
-build: 
+build:
 	go build ./...
+
+gen:
+	go generate ./...
