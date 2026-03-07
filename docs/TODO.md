@@ -12,9 +12,9 @@
 
 4. ~~**Write SQL migrations** — Full relational schema from the DMD: `projects`, `repositories`, `pipelines`, `pipeline_runs`, `jobs`, `job_steps`, `artifacts`, `executions`. 8 migration files in `migrations/` with FK indexes, TIMESTAMPTZ, gen_random_uuid() PKs. Migration runner wired into server startup.~~ ✅
 
-5. **Implement repository layer** — Create a `store` or `db` package with Go interfaces and Postgres implementations for CRUD on each table. Start with `ProjectStore`, `RepositoryStore`, `PipelineStore`, etc. Write tests against a real or test database.
+5. ~~**Implement repository layer** — Create a `store` or `db` package with Go interfaces and Postgres implementations for CRUD on each table. Start with `ProjectStore`, `RepositoryStore`, `PipelineStore`, etc. Write tests against a real or test database.~~ ✅
 
-6. **Implement the Artifact metadata store** — The `artifacts` table operations: create, get-by-id, list-by-job. This is metadata only — the actual bytes come later.
+6. ~~**Implement the Artifact metadata store** — The `artifacts` table operations: create, get-by-id, list-by-job. This is metadata only — the actual bytes come later.~~ ✅
 
 ## Phase 3: Domain Core — State Machines
 

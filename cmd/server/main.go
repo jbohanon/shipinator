@@ -13,6 +13,7 @@ import (
 	"git.nonahob.net/jacob/golibs/datastores/sql/migrate"
 	"git.nonahob.net/jacob/golibs/datastores/sql/postgres"
 	"git.nonahob.net/jacob/shipinator/internal/server/config"
+	pgstore "git.nonahob.net/jacob/shipinator/internal/store/postgres"
 	"github.com/labstack/echo/v4"
 )
 
@@ -61,7 +62,15 @@ func main() {
 	}
 	defer postgres.ClosePool(pool)
 
-	_ = pool // pool will be used by the store layer in a future phase
+	// Construct store layer.
+	_ = pgstore.NewProjectStore(pool)
+	_ = pgstore.NewRepositoryStore(pool)
+	_ = pgstore.NewPipelineStore(pool)
+	_ = pgstore.NewPipelineRunStore(pool)
+	_ = pgstore.NewJobStore(pool)
+	_ = pgstore.NewJobStepStore(pool)
+	_ = pgstore.NewArtifactStore(pool)
+	_ = pgstore.NewExecutionStore(pool)
 
 	e := echo.New()
 	e.HideBanner = true
