@@ -2,6 +2,7 @@ package executor
 
 import (
 	"context"
+	"slices"
 	"time"
 )
 
@@ -36,6 +37,12 @@ const (
 	ExecutionPhaseCanceled  ExecutionPhase = "canceled"
 )
 
+var terminalExecutionPhases = []ExecutionPhase{
+	ExecutionPhaseSucceeded,
+	ExecutionPhaseFailed,
+	ExecutionPhaseCanceled,
+}
+
 // ExecutionStatus contains the current state and optional result metadata.
 type ExecutionStatus struct {
 	Phase      ExecutionPhase
@@ -47,12 +54,7 @@ type ExecutionStatus struct {
 
 // IsTerminal reports whether the execution has reached a terminal phase.
 func (s ExecutionStatus) IsTerminal() bool {
-	switch s.Phase {
-	case ExecutionPhaseSucceeded, ExecutionPhaseFailed, ExecutionPhaseCanceled:
-		return true
-	default:
-		return false
-	}
+	return slices.Contains(terminalExecutionPhases, s.Phase)
 }
 
 // Executor is the abstraction used by Shipinator to run remote work.
