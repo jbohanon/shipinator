@@ -26,7 +26,7 @@
 
 ## Phase 4: Executor Abstraction
 
-10. **Define the Executor interface** — Implement `ExecutionSpec`, `ExecutionHandle`, `ExecutionStatus` types and the `Executor` interface (`Submit`, `Status`, `Cancel`) in an `executor` package.
+10. ~~**Define the Executor interface** — Implement `ExecutionSpec`, `ExecutionHandle`, `ExecutionStatus` types and the `Executor` interface (`Submit`, `Status`, `Cancel`) in an `executor` package.~~ ✅
 
 11. **Implement a mock/local executor** — Before touching Kubernetes, build a simple executor (runs a local command or just logs and returns success) so you can test the full orchestration loop end-to-end without a cluster.
 
