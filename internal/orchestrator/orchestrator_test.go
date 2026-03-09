@@ -9,9 +9,11 @@ import (
 
 	shipcfg "git.nonahob.net/jacob/shipinator/internal/config"
 	"git.nonahob.net/jacob/shipinator/internal/executor"
+	"git.nonahob.net/jacob/shipinator/internal/executor/mocks"
 	"git.nonahob.net/jacob/shipinator/internal/orchestrator"
 	"git.nonahob.net/jacob/shipinator/internal/store"
 	"github.com/google/uuid"
+	"go.uber.org/mock/gomock"
 )
 
 // --- fake stores ---
@@ -101,49 +103,6 @@ func (f *fakeExecutionStore) ListByJobStep(_ context.Context, _ uuid.UUID) ([]st
 	return nil, nil
 }
 
-// --- fake executor ---
-
-// fakeExecutor returns the configured phase on the first Status call after
-// Submit. It tracks Cancel calls.
-type fakeExecutor struct {
-	phase       executor.ExecutionPhase
-	cancelCalls int
-	mu          sync.Mutex
-
-	// blockUntil is closed when Status should return a terminal result.
-	// If nil, Status returns terminal immediately.
-	blockUntil chan struct{}
-}
-
-func (f *fakeExecutor) Submit(_ context.Context, _ executor.ExecutionSpec) (executor.ExecutionHandle, error) {
-	return executor.ExecutionHandle{ID: uuid.New().String()}, nil
-}
-
-func (f *fakeExecutor) Status(_ context.Context, _ executor.ExecutionHandle) (executor.ExecutionStatus, error) {
-	if f.blockUntil != nil {
-		select {
-		case <-f.blockUntil:
-		default:
-			return executor.ExecutionStatus{Phase: executor.ExecutionPhaseRunning}, nil
-		}
-	}
-	return executor.ExecutionStatus{Phase: f.phase}, nil
-}
-
-func (f *fakeExecutor) Cancel(_ context.Context, _ executor.ExecutionHandle) error {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-	f.cancelCalls++
-	if f.blockUntil != nil {
-		select {
-		case <-f.blockUntil:
-		default:
-			close(f.blockUntil)
-		}
-	}
-	return nil
-}
-
 // --- helpers ---
 
 func newOrchestrator(exec executor.Executor, runs *fakeRunStore, jobs *fakeJobStore, steps *fakeJobStepStore) *orchestrator.Orchestrator {
@@ -178,18 +137,27 @@ func buildTestCfg() *shipcfg.ShipinatorConfig {
 // --- tests ---
 
 func TestRun_HappyPath(t *testing.T) {
+	ctrl := gomock.NewController(t)
 	runs := &fakeRunStore{}
 	jobs := &fakeJobStore{}
 	steps := &fakeJobStepStore{}
-	exec := &fakeExecutor{phase: executor.ExecutionPhaseSucceeded}
+
+	handle := executor.ExecutionHandle{ID: "test-handle"}
+	exec := mocks.NewMockExecutor(ctrl)
+	exec.EXPECT().Submit(gomock.Any(), gomock.Any()).Return(handle, nil).Times(2)
+	exec.EXPECT().Status(gomock.Any(), gomock.Any()).Return(executor.ExecutionStatus{Phase: executor.ExecutionPhaseSucceeded}, nil).AnyTimes()
 
 	o := newOrchestrator(exec, runs, jobs, steps)
-	err := o.Run(context.Background(), uuid.New(), buildTestCfg())
-	if err != nil {
+	t.Log("running pipeline: build(compile) + test(unit), executor returns succeeded")
+	if err := o.Run(context.Background(), uuid.New(), buildTestCfg()); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Pipeline run: running, success.
+	t.Logf("pipeline run statuses: %v", runs.statuses)
+	t.Logf("job statuses:          %v", jobs.statuses)
+	t.Logf("step statuses:         %v", steps.statuses)
+
+	// Pipeline run: running → success.
 	assertStatuses(t, "pipeline run", runs.statuses, "running", "success")
 	// Two stages (build + test): each gets running + succeeded.
 	assertStatuses(t, "jobs", jobs.statuses, "running", "succeeded", "running", "succeeded")
@@ -198,16 +166,27 @@ func TestRun_HappyPath(t *testing.T) {
 }
 
 func TestRun_ExecutorFailure_FailsRun(t *testing.T) {
+	ctrl := gomock.NewController(t)
 	runs := &fakeRunStore{}
 	jobs := &fakeJobStore{}
 	steps := &fakeJobStepStore{}
-	exec := &fakeExecutor{phase: executor.ExecutionPhaseFailed}
+
+	handle := executor.ExecutionHandle{ID: "test-handle"}
+	exec := mocks.NewMockExecutor(ctrl)
+	exec.EXPECT().Submit(gomock.Any(), gomock.Any()).Return(handle, nil).Times(1)
+	exec.EXPECT().Status(gomock.Any(), gomock.Any()).Return(executor.ExecutionStatus{Phase: executor.ExecutionPhaseFailed}, nil).AnyTimes()
 
 	o := newOrchestrator(exec, runs, jobs, steps)
+	t.Log("running pipeline: executor returns failed, expecting build stage to fail and run to abort")
 	err := o.Run(context.Background(), uuid.New(), buildTestCfg())
+	t.Logf("Run error: %v", err)
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
+
+	t.Logf("pipeline run statuses: %v", runs.statuses)
+	t.Logf("job statuses:          %v", jobs.statuses)
+	t.Logf("step statuses:         %v", steps.statuses)
 
 	assertFinalStatus(t, "pipeline run", runs.statuses, "failed")
 	assertFinalStatus(t, "jobs", jobs.statuses, "failed")
@@ -215,13 +194,16 @@ func TestRun_ExecutorFailure_FailsRun(t *testing.T) {
 }
 
 func TestRun_ContextCanceled_CancelsRun(t *testing.T) {
+	ctrl := gomock.NewController(t)
 	runs := &fakeRunStore{}
 	jobs := &fakeJobStore{}
 	steps := &fakeJobStepStore{}
-	exec := &fakeExecutor{
-		phase:      executor.ExecutionPhaseSucceeded,
-		blockUntil: make(chan struct{}),
-	}
+
+	handle := executor.ExecutionHandle{ID: "test-handle"}
+	exec := mocks.NewMockExecutor(ctrl)
+	exec.EXPECT().Submit(gomock.Any(), gomock.Any()).Return(handle, nil).Times(1)
+	exec.EXPECT().Status(gomock.Any(), gomock.Any()).Return(executor.ExecutionStatus{Phase: executor.ExecutionPhaseRunning}, nil).AnyTimes()
+	exec.EXPECT().Cancel(gomock.Any(), gomock.Any()).Return(nil).Times(1)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
@@ -230,19 +212,27 @@ func TestRun_ContextCanceled_CancelsRun(t *testing.T) {
 	}()
 
 	o := newOrchestrator(exec, runs, jobs, steps)
+	t.Log("running pipeline: context canceled after 5ms while executor blocks on running")
 	err := o.Run(ctx, uuid.New(), buildTestCfg())
+	t.Logf("Run error: %v", err)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected context.Canceled, got %v", err)
 	}
 
+	t.Logf("pipeline run statuses: %v", runs.statuses)
 	assertFinalStatus(t, "pipeline run", runs.statuses, "canceled")
 }
 
 func TestRun_BuildOnly_NoTestStage(t *testing.T) {
+	ctrl := gomock.NewController(t)
 	runs := &fakeRunStore{}
 	jobs := &fakeJobStore{}
 	steps := &fakeJobStepStore{}
-	exec := &fakeExecutor{phase: executor.ExecutionPhaseSucceeded}
+
+	handle := executor.ExecutionHandle{ID: "test-handle"}
+	exec := mocks.NewMockExecutor(ctrl)
+	exec.EXPECT().Submit(gomock.Any(), gomock.Any()).Return(handle, nil).Times(1)
+	exec.EXPECT().Status(gomock.Any(), gomock.Any()).Return(executor.ExecutionStatus{Phase: executor.ExecutionPhaseSucceeded}, nil).AnyTimes()
 
 	cfg := &shipcfg.ShipinatorConfig{
 		Build: &shipcfg.BuildConfig{
@@ -253,19 +243,26 @@ func TestRun_BuildOnly_NoTestStage(t *testing.T) {
 	}
 
 	o := newOrchestrator(exec, runs, jobs, steps)
+	t.Log("running pipeline: build only (no test stage)")
 	if err := o.Run(context.Background(), uuid.New(), cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
+	t.Logf("job statuses: %v", jobs.statuses)
 	// Only one stage → two job status updates.
 	assertStatuses(t, "jobs", jobs.statuses, "running", "succeeded")
 }
 
 func TestRun_ParallelTestSteps_AllSucceed(t *testing.T) {
+	ctrl := gomock.NewController(t)
 	runs := &fakeRunStore{}
 	jobs := &fakeJobStore{}
 	steps := &fakeJobStepStore{}
-	exec := &fakeExecutor{phase: executor.ExecutionPhaseSucceeded}
+
+	handle := executor.ExecutionHandle{ID: "test-handle"}
+	exec := mocks.NewMockExecutor(ctrl)
+	exec.EXPECT().Submit(gomock.Any(), gomock.Any()).Return(handle, nil).Times(2)
+	exec.EXPECT().Status(gomock.Any(), gomock.Any()).Return(executor.ExecutionStatus{Phase: executor.ExecutionPhaseSucceeded}, nil).AnyTimes()
 
 	cfg := &shipcfg.ShipinatorConfig{
 		Test: &shipcfg.TestConfig{
@@ -277,13 +274,15 @@ func TestRun_ParallelTestSteps_AllSucceed(t *testing.T) {
 	}
 
 	o := newOrchestrator(exec, runs, jobs, steps)
+	t.Log("running pipeline: test stage with 2 parallel steps (lint + unit)")
 	if err := o.Run(context.Background(), uuid.New(), cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Two parallel steps → 4 step status updates (running+succeeded each).
 	steps.mu.Lock()
 	defer steps.mu.Unlock()
+	t.Logf("step statuses: %v", steps.statuses)
+	// Two parallel steps → 4 step status updates (running+succeeded each).
 	if len(steps.statuses) != 4 {
 		t.Errorf("expected 4 step status updates, got %d: %v", len(steps.statuses), steps.statuses)
 	}

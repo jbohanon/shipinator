@@ -18,23 +18,23 @@
 
 ## Phase 3: Domain Core — State Machines
 
-~~7. **Implement the Stage FSM** — Create an `fsm` or `orchestrator` package. Model the stage states: `PENDING -> RUNNING -> SUCCEEDED | FAILED`. Enforce valid transitions. Write thorough tests for every valid and invalid transition.~~
-
-~~8. **Implement the Job/Pipeline Run FSM** — Model the pipeline run states: `PENDING -> RUNNING -> SUCCESS | FAILED | CANCELED`. Model how stage outcomes drive pipeline run transitions (e.g., stage FAILED -> pipeline run FAILED). Persist transitions via the store layer.~~
-
-9. **Implement the Orchestrator** — This is the core coordinator. Given a pipeline run, it should: determine which stages to execute, advance the FSM through `BUILDING -> BUILT -> TESTING -> TESTED -> DEPLOYING -> DEPLOYED`, and react to stage completion callbacks. This drives everything but executes nothing.
+7. ~~**Implement the Stage FSM** — Create an `fsm` or `orchestrator` package. Model the stage states: `PENDING -> RUNNING -> SUCCEEDED | FAILED`. Enforce valid transitions. Write thorough tests for every valid and invalid transition.~~
+   
+8. ~~**Implement the Job/Pipeline Run FSM** — Model the pipeline run states: `PENDING -> RUNNING -> SUCCESS | FAILED | CANCELED`. Model how stage outcomes drive pipeline run transitions (e.g., stage FAILED -> pipeline run FAILED). Persist transitions via the store layer.~~
+   
+9. ~~**Implement the Orchestrator** — This is the core coordinator. Given a pipeline run, it should: determine which stages to execute, advance the FSM through `BUILDING -> BUILT -> TESTING -> TESTED -> DEPLOYING -> DEPLOYED`, and react to stage completion callbacks. This drives everything but executes nothing.~~
 
 ## Phase 4: Executor Abstraction
 
 10. ~~**Define the Executor interface** — Implement `ExecutionSpec`, `ExecutionHandle`, `ExecutionStatus` types and the `Executor` interface (`Submit`, `Status`, `Cancel`) in an `executor` package.~~ ✅
 
-11. **Implement a mock/local executor** — Before touching Kubernetes, build a simple executor (runs a local command or just logs and returns success) so you can test the full orchestration loop end-to-end without a cluster.
-
-12. **Implement the Kubernetes executor** — Translate `ExecutionSpec` into a K8s `Job` resource. Handle submission, status polling/watching, and cancellation. Keep all K8s imports and logic contained in this one implementation.
+11. ~~**Implement a mock/local executor** — Before touching Kubernetes, build a simple executor (runs a local command or just logs and returns success) so you can test the full orchestration loop end-to-end without a cluster.~~
+    
+12. ~~**Implement the Kubernetes executor** — Translate `ExecutionSpec` into a K8s `Job` resource. Handle submission, status polling/watching, and cancellation. Keep all K8s imports and logic contained in this one implementation.~~
 
 ## Phase 5: Artifact Storage
 
-13. **Define the ArtifactStore interface** — `Put(ctx, artifact) (ref, error)` and `Get(ctx, ref) (io.ReadCloser, error)` in an `artifact` package.
+13. **Define the ArtifactStore interface** — `Put(ctx, artifact) (ref, error)` and `Get(ctx, ref) (io.ReadCloser, error)` in an `artifact` package. Create a mock for this interface for use in tests using gomock, mirroring the existing mock generation.
 
 14. **Implement the NFS-backed ArtifactStore** — Use the flat `/<artifact-id>/payload` + `metadata.json` layout from the DMD. Write to a configurable base path. Write tests.
 

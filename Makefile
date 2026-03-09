@@ -1,4 +1,4 @@
-.PHONY: test lint build gen
+.PHONY: test lint build gen test-integration
 
 test:
 	go test ./...
@@ -11,3 +11,6 @@ build:
 
 gen:
 	go generate ./...
+
+test-integration:
+	go test -v -tags=integration -timeout=10m ./internal/executor/kubernetes/...
