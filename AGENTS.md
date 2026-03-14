@@ -108,12 +108,25 @@ The `Executor` interface has three methods: `Submit`, `Status`, `Cancel`. The or
 
 ---
 
+## API conventions (Phase 7 decisions)
+
+**Proto-first API contract.**
+`api/v1/shipinator.proto` is the transport contract source of truth for backend and frontend type generation. Keep transport DTOs in proto and map explicitly to domain/store models in handlers.
+
+**HTTP mapping annotations in proto.**
+Use `google.api.http` options on RPCs so grpc-gateway-compatible routing is defined in one place. The documented v1 routes are already represented there.
+
+**Streaming downloads stay native HTTP.**
+`GET /v1/artifacts/{id}/download` should be implemented as a streaming Echo handler (`io.Copy` from artifact store reader to response writer). Avoid JSON/base64 artifact payloads for large content.
+
+---
+
 ## What's done and what's next
 
-Phases 1–6 are complete (see `docs/TODO.md` for the full list). Phase 7 is next:
-- Define protobuf API in `api/v1/shipinator.proto`
-- Implement HTTP handlers (trigger run, get status, list jobs, artifact download, executor callback)
-- Wire everything in `cmd/server/main.go`
+Phases 1–6 are complete (see `docs/TODO.md` for the full list). In Phase 7:
+- Protobuf API contract is implemented in `api/v1/shipinator.proto` and generated for Go (`api/v1/shipinator.pb.go`, `api/v1/shipinator_grpc.pb.go`)
+- Next: implement HTTP handlers (trigger run, get status, list jobs, artifact metadata/download, executor callback)
+- Then wire handlers, stores, executor, subsystems, and orchestrator in `cmd/server/main.go`
 
 Current `cmd/server/main.go` is a stub. The server package and server config exist but are not yet wired to stores or the orchestrator.
 

@@ -1,0 +1,193 @@
+syntax = "proto3";
+
+package shipinator.v1;
+
+option go_package = "git.nonahob.net/jacob/shipinator/api/v1;shipinatorv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "google/api/annotations.proto";
+
+// PipelineService exposes pipeline-run creation and read APIs.
+service PipelineService {
+  // CreatePipelineRun maps to POST /v1/pipelines/{id}/runs.
+  rpc CreatePipelineRun(CreatePipelineRunRequest) returns (CreatePipelineRunResponse) {
+    option (google.api.http) = {
+      post: "/v1/pipelines/{pipeline_id}/runs"
+      body: "*"
+    };
+  }
+  // GetPipelineRun maps to GET /v1/pipeline-runs/{id}.
+  rpc GetPipelineRun(GetPipelineRunRequest) returns (GetPipelineRunResponse) {
+    option (google.api.http) = {
+      get: "/v1/pipeline-runs/{pipeline_run_id}"
+    };
+  }
+  // ListPipelineRunJobs maps to GET /v1/pipeline-runs/{id}/jobs.
+  rpc ListPipelineRunJobs(ListPipelineRunJobsRequest) returns (ListPipelineRunJobsResponse) {
+    option (google.api.http) = {
+      get: "/v1/pipeline-runs/{pipeline_run_id}/jobs"
+    };
+  }
+}
+
+// ArtifactService exposes artifact metadata and payload retrieval APIs.
+service ArtifactService {
+  // GetArtifactMetadata maps to GET /v1/artifacts/{id}/metadata.
+  rpc GetArtifactMetadata(GetArtifactMetadataRequest) returns (GetArtifactMetadataResponse) {
+    option (google.api.http) = {
+      get: "/v1/artifacts/{artifact_id}/metadata"
+    };
+  }
+  // DownloadArtifact maps to GET /v1/artifacts/{id}/download.
+  rpc DownloadArtifact(DownloadArtifactRequest) returns (DownloadArtifactResponse) {
+    option (google.api.http) = {
+      get: "/v1/artifacts/{artifact_id}/download"
+    };
+  }
+}
+
+// ExecutionService exposes executor-to-control-plane status callbacks.
+service ExecutionService {
+  // ReportExecutionStatus maps to POST /v1/executions/{id}/status.
+  rpc ReportExecutionStatus(ReportExecutionStatusRequest) returns (ReportExecutionStatusResponse) {
+    option (google.api.http) = {
+      post: "/v1/executions/{execution_id}/status"
+      body: "*"
+    };
+  }
+}
+
+enum PipelineRunStatus {
+  PIPELINE_RUN_STATUS_UNSPECIFIED = 0;
+  PIPELINE_RUN_STATUS_PENDING = 1;
+  PIPELINE_RUN_STATUS_RUNNING = 2;
+  PIPELINE_RUN_STATUS_SUCCESS = 3;
+  PIPELINE_RUN_STATUS_FAILED = 4;
+  PIPELINE_RUN_STATUS_CANCELED = 5;
+}
+
+enum JobType {
+  JOB_TYPE_UNSPECIFIED = 0;
+  JOB_TYPE_BUILD = 1;
+  JOB_TYPE_TEST = 2;
+  JOB_TYPE_DEPLOY = 3;
+}
+
+enum JobStatus {
+  JOB_STATUS_UNSPECIFIED = 0;
+  JOB_STATUS_PENDING = 1;
+  JOB_STATUS_RUNNING = 2;
+  JOB_STATUS_SUCCESS = 3;
+  JOB_STATUS_FAILED = 4;
+  JOB_STATUS_CANCELED = 5;
+}
+
+enum ExecutionPhase {
+  EXECUTION_PHASE_UNSPECIFIED = 0;
+  EXECUTION_PHASE_PENDING = 1;
+  EXECUTION_PHASE_RUNNING = 2;
+  EXECUTION_PHASE_SUCCEEDED = 3;
+  EXECUTION_PHASE_FAILED = 4;
+  EXECUTION_PHASE_CANCELED = 5;
+}
+
+enum CallbackStatus {
+  CALLBACK_STATUS_UNSPECIFIED = 0;
+  CALLBACK_STATUS_RUNNING = 1;
+  CALLBACK_STATUS_SUCCESS = 2;
+  CALLBACK_STATUS_FAILED = 3;
+  CALLBACK_STATUS_CANCELED = 4;
+}
+
+message PipelineRun {
+  string id = 1;
+  string pipeline_id = 2;
+  string git_ref = 3;
+  string git_sha = 4;
+  PipelineRunStatus status = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp started_at = 7;
+  google.protobuf.Timestamp finished_at = 8;
+}
+
+message Job {
+  string id = 1;
+  string pipeline_run_id = 2;
+  JobType job_type = 3;
+  string name = 4;
+  JobStatus status = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp started_at = 7;
+  google.protobuf.Timestamp finished_at = 8;
+}
+
+message Artifact {
+  string id = 1;
+  string job_id = 2;
+  string artifact_type = 3;
+  string storage_backend = 4;
+  string storage_locator = 5;
+  string checksum = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+message CreatePipelineRunRequest {
+  string pipeline_id = 1;
+  string git_ref = 2;
+  string git_sha = 3;
+}
+
+message CreatePipelineRunResponse {
+  PipelineRun pipeline_run = 1;
+}
+
+message GetPipelineRunRequest {
+  string pipeline_run_id = 1;
+}
+
+message GetPipelineRunResponse {
+  PipelineRun pipeline_run = 1;
+}
+
+message ListPipelineRunJobsRequest {
+  string pipeline_run_id = 1;
+}
+
+message ListPipelineRunJobsResponse {
+  repeated Job jobs = 1;
+}
+
+message GetArtifactMetadataRequest {
+  string artifact_id = 1;
+}
+
+message GetArtifactMetadataResponse {
+  Artifact artifact = 1;
+}
+
+message DownloadArtifactRequest {
+  string artifact_id = 1;
+}
+
+message DownloadArtifactResponse {
+  bytes payload = 1;
+  string content_type = 2;
+  string file_name = 3;
+}
+
+message ReportExecutionStatusRequest {
+  string execution_id = 1;
+  CallbackStatus status = 2;
+  google.protobuf.Int32Value exit_code = 3;
+  string logs_uri = 4;
+  repeated string artifact_ids = 5;
+  string message = 6;
+  google.protobuf.Timestamp started_at = 7;
+  google.protobuf.Timestamp finished_at = 8;
+}
+
+message ReportExecutionStatusResponse {
+  string execution_id = 1;
+  ExecutionPhase phase = 2;
+}

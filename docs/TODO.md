@@ -48,7 +48,7 @@
 
 ## Phase 7: API Layer
 
-18. **Define the protobuf API** — Flesh out `api/v1/shipinator.proto` with messages and services for pipeline control, artifact access, and executor callbacks. Generate Go code.
+18. ~~**Define the protobuf API** — Flesh out `api/v1/shipinator.proto` with messages and services for pipeline control, artifact access, and executor callbacks. Generate Go code.~~ ✅
 
 19. **Implement API handlers** — Wire up the HTTP/gRPC endpoints from the DMD:
     - `POST /v1/pipelines/{id}/runs` — trigger a pipeline run
@@ -56,6 +56,7 @@
     - `GET /v1/pipeline-runs/{id}/jobs` — list jobs in a run
     - `GET /v1/artifacts/{id}/metadata` and `/download`
     - `POST /v1/executions/{id}/status` — executor callback
+    - Architecture decision: use grpc-gateway style HTTP mappings in `api/v1/shipinator.proto` for control/metadata APIs, and implement `/v1/artifacts/{id}/download` as native streaming HTTP in Echo (not base64 JSON payloads)
 
 20. **Wire everything together in `cmd/server/main.go`** — Initialize DB, create stores, create executor, create orchestrator, create subsystems, start HTTP server. This is where the modular monolith comes together.
 
