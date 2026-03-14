@@ -25,32 +25,36 @@ func (s *ProjectStore) Create(ctx context.Context, p *store.Project) error {
 	_, err := s.pool.Exec(ctx,
 		`INSERT INTO projects (id, name, description, created_at, updated_at)
 		 VALUES ($1, $2, $3, $4, $5)`,
-		p.ID, p.Name, p.Description, p.CreatedAt, p.UpdatedAt,
+		toUUID(p.ID), p.Name, p.Description, p.CreatedAt, p.UpdatedAt,
 	)
 	return err
 }
 
-func (s *ProjectStore) GetByID(ctx context.Context, id uuid.UUID) (*store.Project, error) {
+func (s *ProjectStore) GetByID(ctx context.Context, id store.ProjectID) (*store.Project, error) {
 	var p store.Project
+	var idRaw uuid.UUID
 	err := s.pool.QueryRow(ctx,
 		`SELECT id, name, description, created_at, updated_at
-		 FROM projects WHERE id = $1`, id,
-	).Scan(&p.ID, &p.Name, &p.Description, &p.CreatedAt, &p.UpdatedAt)
+		 FROM projects WHERE id = $1`, toUUID(id),
+	).Scan(&idRaw, &p.Name, &p.Description, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
 		return nil, wrapNoRowsByID("project", id, err)
 	}
+	p.ID = store.ProjectID(idRaw)
 	return &p, nil
 }
 
 func (s *ProjectStore) GetByName(ctx context.Context, name string) (*store.Project, error) {
 	var p store.Project
+	var idRaw uuid.UUID
 	err := s.pool.QueryRow(ctx,
 		`SELECT id, name, description, created_at, updated_at
 		 FROM projects WHERE name = $1`, name,
-	).Scan(&p.ID, &p.Name, &p.Description, &p.CreatedAt, &p.UpdatedAt)
+	).Scan(&idRaw, &p.Name, &p.Description, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
 		return nil, wrapNoRowsByName("project", name, err)
 	}
+	p.ID = store.ProjectID(idRaw)
 	return &p, nil
 }
 
@@ -66,9 +70,11 @@ func (s *ProjectStore) List(ctx context.Context) ([]store.Project, error) {
 	var projects []store.Project
 	for rows.Next() {
 		var p store.Project
-		if err := rows.Scan(&p.ID, &p.Name, &p.Description, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		var idRaw uuid.UUID
+		if err := rows.Scan(&idRaw, &p.Name, &p.Description, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return nil, err
 		}
+		p.ID = store.ProjectID(idRaw)
 		projects = append(projects, p)
 	}
 	return projects, rows.Err()
@@ -79,7 +85,7 @@ func (s *ProjectStore) Update(ctx context.Context, p *store.Project) error {
 	result, err := s.pool.Exec(ctx,
 		`UPDATE projects SET name = $1, description = $2, updated_at = $3
 		 WHERE id = $4`,
-		p.Name, p.Description, p.UpdatedAt, p.ID,
+		p.Name, p.Description, p.UpdatedAt, toUUID(p.ID),
 	)
 	if err != nil {
 		return err
@@ -87,8 +93,8 @@ func (s *ProjectStore) Update(ctx context.Context, p *store.Project) error {
 	return ensureRowsAffected(result, "project", p.ID)
 }
 
-func (s *ProjectStore) Delete(ctx context.Context, id uuid.UUID) error {
-	result, err := s.pool.Exec(ctx, `DELETE FROM projects WHERE id = $1`, id)
+func (s *ProjectStore) Delete(ctx context.Context, id store.ProjectID) error {
+	result, err := s.pool.Exec(ctx, `DELETE FROM projects WHERE id = $1`, toUUID(id))
 	if err != nil {
 		return err
 	}

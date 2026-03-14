@@ -12,7 +12,6 @@ import (
 	"git.nonahob.net/jacob/shipinator/internal/executor/mocks"
 	"git.nonahob.net/jacob/shipinator/internal/orchestrator"
 	"git.nonahob.net/jacob/shipinator/internal/store"
-	"github.com/google/uuid"
 	"go.uber.org/mock/gomock"
 )
 
@@ -23,18 +22,18 @@ type fakeRunStore struct {
 	statuses []string
 }
 
-func (f *fakeRunStore) UpdateStatus(_ context.Context, _ uuid.UUID, status string) error {
+func (f *fakeRunStore) UpdateStatus(_ context.Context, _ store.PipelineRunID, status string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.statuses = append(f.statuses, status)
 	return nil
 }
 
-func (f *fakeRunStore) Create(_ context.Context, _ *store.PipelineRun) error        { return nil }
-func (f *fakeRunStore) GetByID(_ context.Context, _ uuid.UUID) (*store.PipelineRun, error) {
-	return &store.PipelineRun{ID: uuid.New()}, nil
+func (f *fakeRunStore) Create(_ context.Context, _ *store.PipelineRun) error { return nil }
+func (f *fakeRunStore) GetByID(_ context.Context, _ store.PipelineRunID) (*store.PipelineRun, error) {
+	return &store.PipelineRun{ID: store.NewPipelineRunID()}, nil
 }
-func (f *fakeRunStore) ListByPipeline(_ context.Context, _ uuid.UUID) ([]store.PipelineRun, error) {
+func (f *fakeRunStore) ListByPipeline(_ context.Context, _ store.PipelineID) ([]store.PipelineRun, error) {
 	return nil, nil
 }
 func (f *fakeRunStore) ListByStatus(_ context.Context, _ string) ([]store.PipelineRun, error) {
@@ -46,7 +45,7 @@ type fakeJobStore struct {
 	statuses []string
 }
 
-func (f *fakeJobStore) UpdateStatus(_ context.Context, _ uuid.UUID, status string) error {
+func (f *fakeJobStore) UpdateStatus(_ context.Context, _ store.JobID, status string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.statuses = append(f.statuses, status)
@@ -54,13 +53,13 @@ func (f *fakeJobStore) UpdateStatus(_ context.Context, _ uuid.UUID, status strin
 }
 
 func (f *fakeJobStore) Create(_ context.Context, j *store.Job) error {
-	j.ID = uuid.New()
+	j.ID = store.NewJobID()
 	return nil
 }
-func (f *fakeJobStore) GetByID(_ context.Context, _ uuid.UUID) (*store.Job, error) {
-	return &store.Job{ID: uuid.New()}, nil
+func (f *fakeJobStore) GetByID(_ context.Context, _ store.JobID) (*store.Job, error) {
+	return &store.Job{ID: store.NewJobID()}, nil
 }
-func (f *fakeJobStore) ListByPipelineRun(_ context.Context, _ uuid.UUID) ([]store.Job, error) {
+func (f *fakeJobStore) ListByPipelineRun(_ context.Context, _ store.PipelineRunID) ([]store.Job, error) {
 	return nil, nil
 }
 
@@ -69,7 +68,7 @@ type fakeJobStepStore struct {
 	statuses []string
 }
 
-func (f *fakeJobStepStore) UpdateStatus(_ context.Context, _ uuid.UUID, status string) error {
+func (f *fakeJobStepStore) UpdateStatus(_ context.Context, _ store.JobStepID, status string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.statuses = append(f.statuses, status)
@@ -77,29 +76,39 @@ func (f *fakeJobStepStore) UpdateStatus(_ context.Context, _ uuid.UUID, status s
 }
 
 func (f *fakeJobStepStore) Create(_ context.Context, s *store.JobStep) error {
-	s.ID = uuid.New()
+	s.ID = store.NewJobStepID()
 	return nil
 }
-func (f *fakeJobStepStore) GetByID(_ context.Context, _ uuid.UUID) (*store.JobStep, error) {
-	return &store.JobStep{ID: uuid.New()}, nil
+func (f *fakeJobStepStore) GetByID(_ context.Context, _ store.JobStepID) (*store.JobStep, error) {
+	return &store.JobStep{ID: store.NewJobStepID()}, nil
 }
-func (f *fakeJobStepStore) ListByJob(_ context.Context, _ uuid.UUID) ([]store.JobStep, error) {
+func (f *fakeJobStepStore) ListByJob(_ context.Context, _ store.JobID) ([]store.JobStep, error) {
 	return nil, nil
 }
 
 type fakeExecutionStore struct{}
 
 func (f *fakeExecutionStore) Create(_ context.Context, e *store.Execution) error {
-	e.ID = uuid.New()
+	e.ID = store.NewExecutionID()
 	return nil
 }
-func (f *fakeExecutionStore) UpdateStatus(_ context.Context, _ uuid.UUID, _ string) error {
+func (f *fakeExecutionStore) UpdateStatus(_ context.Context, _ store.ExecutionID, _ string) error {
 	return nil
 }
-func (f *fakeExecutionStore) GetByID(_ context.Context, _ uuid.UUID) (*store.Execution, error) {
-	return &store.Execution{ID: uuid.New()}, nil
+func (f *fakeExecutionStore) GetByID(_ context.Context, _ store.ExecutionID) (*store.Execution, error) {
+	return &store.Execution{ID: store.NewExecutionID()}, nil
 }
-func (f *fakeExecutionStore) ListByJobStep(_ context.Context, _ uuid.UUID) ([]store.Execution, error) {
+func (f *fakeExecutionStore) ListByJobStep(_ context.Context, _ store.JobStepID) ([]store.Execution, error) {
+	return nil, nil
+}
+
+type fakeArtifactStore struct{}
+
+func (f *fakeArtifactStore) Create(_ context.Context, _ *store.Artifact) error { return nil }
+func (f *fakeArtifactStore) GetByID(_ context.Context, _ store.ArtifactID) (*store.Artifact, error) {
+	return &store.Artifact{}, nil
+}
+func (f *fakeArtifactStore) ListByJob(_ context.Context, _ store.JobID) ([]store.Artifact, error) {
 	return nil, nil
 }
 
@@ -111,10 +120,13 @@ func newOrchestrator(exec executor.Executor, runs *fakeRunStore, jobs *fakeJobSt
 		jobs,
 		steps,
 		&fakeExecutionStore{},
+		&fakeArtifactStore{},
 		exec,
 		orchestrator.Config{
-			BuilderImage: "shipinator-builder:latest",
-			PollInterval: time.Millisecond, // fast polling for tests
+			BuilderImage:     "shipinator-builder:latest",
+			PollInterval:     time.Millisecond,
+			ArtifactBackend:  "nfs",
+			ArtifactBasePath: "/artifacts",
 		},
 	)
 }
@@ -149,7 +161,7 @@ func TestRun_HappyPath(t *testing.T) {
 
 	o := newOrchestrator(exec, runs, jobs, steps)
 	t.Log("running pipeline: build(compile) + test(unit), executor returns succeeded")
-	if err := o.Run(context.Background(), uuid.New(), buildTestCfg()); err != nil {
+	if err := o.Run(context.Background(), store.NewPipelineRunID(), buildTestCfg()); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -178,7 +190,7 @@ func TestRun_ExecutorFailure_FailsRun(t *testing.T) {
 
 	o := newOrchestrator(exec, runs, jobs, steps)
 	t.Log("running pipeline: executor returns failed, expecting build stage to fail and run to abort")
-	err := o.Run(context.Background(), uuid.New(), buildTestCfg())
+	err := o.Run(context.Background(), store.NewPipelineRunID(), buildTestCfg())
 	t.Logf("Run error: %v", err)
 	if err == nil {
 		t.Fatal("expected error, got nil")
@@ -213,7 +225,7 @@ func TestRun_ContextCanceled_CancelsRun(t *testing.T) {
 
 	o := newOrchestrator(exec, runs, jobs, steps)
 	t.Log("running pipeline: context canceled after 5ms while executor blocks on running")
-	err := o.Run(ctx, uuid.New(), buildTestCfg())
+	err := o.Run(ctx, store.NewPipelineRunID(), buildTestCfg())
 	t.Logf("Run error: %v", err)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected context.Canceled, got %v", err)
@@ -244,7 +256,7 @@ func TestRun_BuildOnly_NoTestStage(t *testing.T) {
 
 	o := newOrchestrator(exec, runs, jobs, steps)
 	t.Log("running pipeline: build only (no test stage)")
-	if err := o.Run(context.Background(), uuid.New(), cfg); err != nil {
+	if err := o.Run(context.Background(), store.NewPipelineRunID(), cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -275,7 +287,7 @@ func TestRun_ParallelTestSteps_AllSucceed(t *testing.T) {
 
 	o := newOrchestrator(exec, runs, jobs, steps)
 	t.Log("running pipeline: test stage with 2 parallel steps (lint + unit)")
-	if err := o.Run(context.Background(), uuid.New(), cfg); err != nil {
+	if err := o.Run(context.Background(), store.NewPipelineRunID(), cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

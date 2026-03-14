@@ -11,10 +11,14 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func ensureID(id *uuid.UUID) {
-	if *id == uuid.Nil {
-		*id = uuid.New()
+func ensureID[T ~[16]byte](id *T) {
+	if *id == (T{}) {
+		*id = T([16]byte(uuid.New()))
 	}
+}
+
+func toUUID[T ~[16]byte](id T) uuid.UUID {
+	return uuid.UUID([16]byte(id))
 }
 
 func setCreatedAt(createdAt *time.Time) {
@@ -37,9 +41,9 @@ func setDefaultStatus(status *string, fallback string) {
 	}
 }
 
-func wrapNoRowsByID(entity string, id uuid.UUID, err error) error {
+func wrapNoRowsByID[T ~[16]byte](entity string, id T, err error) error {
 	if errors.Is(err, pgx.ErrNoRows) {
-		return fmt.Errorf("%s %s: %w", entity, id, store.ErrNotFound)
+		return fmt.Errorf("%s %s: %w", entity, uuid.UUID(id), store.ErrNotFound)
 	}
 	return err
 }
@@ -51,9 +55,9 @@ func wrapNoRowsByName(entity, name string, err error) error {
 	return err
 }
 
-func ensureRowsAffected(result pgconn.CommandTag, entity string, id uuid.UUID) error {
+func ensureRowsAffected[T ~[16]byte](result pgconn.CommandTag, entity string, id T) error {
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("%s %s: %w", entity, id, store.ErrNotFound)
+		return fmt.Errorf("%s %s: %w", entity, uuid.UUID(id), store.ErrNotFound)
 	}
 	return nil
 }

@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"sync"
 	"time"
 
+	"git.nonahob.net/jacob/shipinator/internal/buildinator"
 	shipcfg "git.nonahob.net/jacob/shipinator/internal/config"
+	"git.nonahob.net/jacob/shipinator/internal/deployinator"
 	"git.nonahob.net/jacob/shipinator/internal/executor"
 	"git.nonahob.net/jacob/shipinator/internal/store"
-	"github.com/google/uuid"
+	"git.nonahob.net/jacob/shipinator/internal/testinator"
 )
 
 const defaultPollInterval = 5 * time.Second
@@ -22,11 +23,18 @@ type Config struct {
 	// PollInterval controls how often the orchestrator polls the executor for
 	// step completion. Defaults to 5 seconds if zero.
 	PollInterval time.Duration
+	// ArtifactBackend is the storage backend label recorded in artifact
+	// metadata (e.g. artifact.BackendNFS).
+	ArtifactBackend string
+	// ArtifactBasePath is the root path on the artifact backend where the
+	// executor writes artifact bytes (e.g. "/artifacts").
+	ArtifactBasePath string
 }
 
 // Orchestrator drives pipeline runs from pending through to a terminal state.
-// It translates .shipinator.yaml configuration into executor submissions,
-// manages FSM transitions, and persists all state changes.
+// Stage-specific logic is delegated to the buildinator, testinator, and
+// deployinator subsystems; the orchestrator manages job lifecycle and FSM
+// transitions.
 type Orchestrator struct {
 	runs       store.PipelineRunStore
 	jobs       store.JobStore
@@ -34,16 +42,21 @@ type Orchestrator struct {
 	executions store.ExecutionStore
 	exec       executor.Executor
 
-	builderImage string
+	build  *buildinator.Buildinator
+	test   *testinator.Testinator
+	deploy *deployinator.Deployinator
+
 	pollInterval time.Duration
 }
 
-// New creates a new Orchestrator.
+// New creates a new Orchestrator. artifacts is the DB store used to register
+// and look up artifact metadata across build and deploy stages.
 func New(
 	runs store.PipelineRunStore,
 	jobs store.JobStore,
 	steps store.JobStepStore,
 	executions store.ExecutionStore,
+	artifacts store.ArtifactStore,
 	exec executor.Executor,
 	cfg Config,
 ) *Orchestrator {
@@ -51,22 +64,29 @@ func New(
 	if pi == 0 {
 		pi = defaultPollInterval
 	}
-	return &Orchestrator{
+	o := &Orchestrator{
 		runs:         runs,
 		jobs:         jobs,
 		steps:        steps,
 		executions:   executions,
 		exec:         exec,
-		builderImage: cfg.BuilderImage,
 		pollInterval: pi,
 	}
+	o.build = buildinator.New(
+		buildinator.StepFn(o.runStep),
+		artifacts,
+		cfg.ArtifactBackend,
+		cfg.ArtifactBasePath,
+		cfg.BuilderImage,
+	)
+	o.test = testinator.New(testinator.StepFn(o.runStep), cfg.BuilderImage)
+	o.deploy = deployinator.New(deployinator.StepFn(o.runStep), artifacts, cfg.BuilderImage)
+	return o
 }
 
 // Run executes the pipeline run identified by runID using the provided config.
 // It blocks until the run reaches a terminal state or ctx is cancelled.
-// The caller is responsible for ensuring the pipeline run exists in the store
-// and is in the pending state before calling Run.
-func (o *Orchestrator) Run(ctx context.Context, runID uuid.UUID, cfg *shipcfg.ShipinatorConfig) error {
+func (o *Orchestrator) Run(ctx context.Context, runID store.PipelineRunID, cfg *shipcfg.ShipinatorConfig) error {
 	log := slog.With("run_id", runID)
 
 	if err := o.runs.UpdateStatus(ctx, runID, string(PipelineRunStateRunning)); err != nil {
@@ -76,8 +96,6 @@ func (o *Orchestrator) Run(ctx context.Context, runID uuid.UUID, cfg *shipcfg.Sh
 
 	runErr := o.executeStages(ctx, runID, cfg, log)
 
-	// Use a detached context for the final update so that context cancellation
-	// does not prevent recording the terminal state.
 	finalCtx := context.WithoutCancel(ctx)
 	finalState := PipelineRunStateSuccess
 	switch {
@@ -95,19 +113,23 @@ func (o *Orchestrator) Run(ctx context.Context, runID uuid.UUID, cfg *shipcfg.Sh
 	return runErr
 }
 
-func (o *Orchestrator) executeStages(ctx context.Context, runID uuid.UUID, cfg *shipcfg.ShipinatorConfig, log *slog.Logger) error {
+func (o *Orchestrator) executeStages(ctx context.Context, runID store.PipelineRunID, cfg *shipcfg.ShipinatorConfig, log *slog.Logger) error {
+	var buildJobID store.JobID
+
 	if cfg.Build != nil {
-		if err := o.runStage(ctx, runID, "build", func(ctx context.Context, jobID uuid.UUID) error {
-			return o.runBuildSteps(ctx, jobID, cfg.Build.Steps)
-		}); err != nil {
+		id, err := o.runStage(ctx, runID, store.JobTypeBuild, func(ctx context.Context, jobID store.JobID) error {
+			return o.build.Run(ctx, jobID, cfg.Build.Steps)
+		})
+		if err != nil {
 			log.Error("build stage failed", "error", err)
 			return err
 		}
+		buildJobID = id
 	}
 
 	if cfg.Test != nil {
-		if err := o.runStage(ctx, runID, "test", func(ctx context.Context, jobID uuid.UUID) error {
-			return o.runTestSteps(ctx, jobID, cfg.Test.Steps)
+		if _, err := o.runStage(ctx, runID, store.JobTypeTest, func(ctx context.Context, jobID store.JobID) error {
+			return o.test.Run(ctx, jobID, cfg.Test.Steps)
 		}); err != nil {
 			log.Error("test stage failed", "error", err)
 			return err
@@ -115,8 +137,8 @@ func (o *Orchestrator) executeStages(ctx context.Context, runID uuid.UUID, cfg *
 	}
 
 	if cfg.Deploy != nil {
-		if err := o.runStage(ctx, runID, "deploy", func(ctx context.Context, jobID uuid.UUID) error {
-			return o.runDeployStep(ctx, jobID, cfg.Deploy)
+		if _, err := o.runStage(ctx, runID, store.JobTypeDeploy, func(ctx context.Context, jobID store.JobID) error {
+			return o.deploy.Run(ctx, jobID, buildJobID, cfg.Deploy)
 		}); err != nil {
 			log.Error("deploy stage failed", "error", err)
 			return err
@@ -127,8 +149,9 @@ func (o *Orchestrator) executeStages(ctx context.Context, runID uuid.UUID, cfg *
 }
 
 // runStage creates a job for the given stage type, transitions it through its
-// lifecycle, and invokes fn to execute the stage's steps.
-func (o *Orchestrator) runStage(ctx context.Context, runID uuid.UUID, jobType string, fn func(context.Context, uuid.UUID) error) error {
+// lifecycle, and invokes fn to execute the stage's steps. It returns the job
+// ID so callers can reference the job's artifacts in subsequent stages.
+func (o *Orchestrator) runStage(ctx context.Context, runID store.PipelineRunID, jobType string, fn func(context.Context, store.JobID) error) (store.JobID, error) {
 	log := slog.With("run_id", runID, "stage", jobType)
 
 	job := &store.Job{
@@ -137,12 +160,12 @@ func (o *Orchestrator) runStage(ctx context.Context, runID uuid.UUID, jobType st
 		Name:          jobType,
 	}
 	if err := o.jobs.Create(ctx, job); err != nil {
-		return fmt.Errorf("create %s job: %w", jobType, err)
+		return store.JobID{}, fmt.Errorf("create %s job: %w", jobType, err)
 	}
 	log = log.With("job_id", job.ID)
 
 	if err := o.jobs.UpdateStatus(ctx, job.ID, string(StageStateRunning)); err != nil {
-		return fmt.Errorf("start %s job: %w", jobType, err)
+		return store.JobID{}, fmt.Errorf("start %s job: %w", jobType, err)
 	}
 	log.Info("stage started")
 
@@ -159,112 +182,12 @@ func (o *Orchestrator) runStage(ctx context.Context, runID uuid.UUID, jobType st
 	}
 	log.Info("stage finished", "state", finalState)
 
-	return stageErr
-}
-
-// runBuildSteps runs build steps sequentially.
-func (o *Orchestrator) runBuildSteps(ctx context.Context, jobID uuid.UUID, steps []shipcfg.BuildStep) error {
-	for i, s := range steps {
-		order := i
-		artifacts := make([]executor.ArtifactSpec, len(s.Outputs))
-		for j, out := range s.Outputs {
-			artifacts[j] = executor.ArtifactSpec{Type: out.Type, Path: out.Path}
-		}
-		spec := executor.ExecutionSpec{
-			Image:     o.builderImage,
-			Command:   []string{"sh", "-c", s.Run},
-			Env:       map[string]string{},
-			Artifacts: artifacts,
-		}
-		if err := o.runStep(ctx, jobID, s.Name, order, nil, spec); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// runTestSteps runs test steps in order. Adjacent steps with Parallel: true
-// are batched and executed concurrently; sequential steps run one at a time.
-func (o *Orchestrator) runTestSteps(ctx context.Context, jobID uuid.UUID, steps []shipcfg.TestStep) error {
-	i := 0
-	order := 0
-	for i < len(steps) {
-		if !steps[i].Parallel {
-			s := steps[i]
-			spec := executor.ExecutionSpec{
-				Image:   o.builderImage,
-				Command: []string{"sh", "-c", s.Run},
-				Env:     map[string]string{},
-			}
-			if err := o.runStep(ctx, jobID, s.Name, order, nil, spec); err != nil {
-				return err
-			}
-			i++
-			order++
-			continue
-		}
-
-		// Collect consecutive parallel steps into a batch.
-		groupName := fmt.Sprintf("parallel-%d", order)
-		var batch []shipcfg.TestStep
-		for i < len(steps) && steps[i].Parallel {
-			batch = append(batch, steps[i])
-			i++
-		}
-		if err := o.runParallelTestSteps(ctx, jobID, batch, order, groupName); err != nil {
-			return err
-		}
-		order += len(batch)
-	}
-	return nil
-}
-
-func (o *Orchestrator) runParallelTestSteps(ctx context.Context, jobID uuid.UUID, steps []shipcfg.TestStep, orderBase int, group string) error {
-	var (
-		wg   sync.WaitGroup
-		mu   sync.Mutex
-		errs []error
-	)
-	for i, s := range steps {
-		wg.Add(1)
-		go func(s shipcfg.TestStep, ord int) {
-			defer wg.Done()
-			spec := executor.ExecutionSpec{
-				Image:   o.builderImage,
-				Command: []string{"sh", "-c", s.Run},
-				Env:     map[string]string{},
-			}
-			if err := o.runStep(ctx, jobID, s.Name, ord, &group, spec); err != nil {
-				mu.Lock()
-				errs = append(errs, err)
-				mu.Unlock()
-			}
-		}(s, orderBase+i)
-	}
-	wg.Wait()
-
-	if len(errs) > 0 {
-		return errs[0]
-	}
-	return nil
-}
-
-// runDeployStep submits a single deploy execution derived from DeployConfig.
-// TODO: resolve artifact storage path from a prior build artifact once the
-// executor callback API is implemented.
-func (o *Orchestrator) runDeployStep(ctx context.Context, jobID uuid.UUID, cfg *shipcfg.DeployConfig) error {
-	cmd := fmt.Sprintf("helm upgrade --install shipinator-%s . --namespace %s", cfg.Artifact, cfg.Namespace)
-	spec := executor.ExecutionSpec{
-		Image:   o.builderImage,
-		Command: []string{"sh", "-c", cmd},
-		Env:     map[string]string{},
-	}
-	return o.runStep(ctx, jobID, "deploy", 0, nil, spec)
+	return job.ID, stageErr
 }
 
 // runStep encapsulates the full lifecycle of a single job step:
 // create → pending → running → submit → poll → terminal.
-func (o *Orchestrator) runStep(ctx context.Context, jobID uuid.UUID, name string, order int, parallelGroup *string, spec executor.ExecutionSpec) error {
+func (o *Orchestrator) runStep(ctx context.Context, jobID store.JobID, name string, order int, parallelGroup *string, spec executor.ExecutionSpec) error {
 	log := slog.With("job_id", jobID, "step", name)
 
 	step := &store.JobStep{
@@ -301,7 +224,7 @@ func (o *Orchestrator) runStep(ctx context.Context, jobID uuid.UUID, name string
 
 // executeAndPoll submits a step to the executor, records the execution, and
 // polls until a terminal state is reached or ctx is cancelled.
-func (o *Orchestrator) executeAndPoll(ctx context.Context, stepID uuid.UUID, spec executor.ExecutionSpec, log *slog.Logger) error {
+func (o *Orchestrator) executeAndPoll(ctx context.Context, stepID store.JobStepID, spec executor.ExecutionSpec, log *slog.Logger) error {
 	handle, err := o.exec.Submit(ctx, spec)
 	if err != nil {
 		return fmt.Errorf("submit step: %w", err)
@@ -322,7 +245,7 @@ func (o *Orchestrator) executeAndPoll(ctx context.Context, stepID uuid.UUID, spe
 
 // poll waits until the executor reports a terminal status for handle,
 // updating the execution record on each phase change.
-func (o *Orchestrator) poll(ctx context.Context, execID uuid.UUID, handle executor.ExecutionHandle, log *slog.Logger) error {
+func (o *Orchestrator) poll(ctx context.Context, execID store.ExecutionID, handle executor.ExecutionHandle, log *slog.Logger) error {
 	ticker := time.NewTicker(o.pollInterval)
 	defer ticker.Stop()
 

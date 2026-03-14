@@ -27,27 +27,30 @@ func (s *JobStepStore) Create(ctx context.Context, js *store.JobStep) error {
 	_, err := s.pool.Exec(ctx,
 		`INSERT INTO job_steps (id, job_id, name, execution_order, parallel_group, status, created_at, started_at, finished_at)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-		js.ID, js.JobID, js.Name, js.ExecutionOrder, js.ParallelGroup, js.Status, js.CreatedAt, js.StartedAt, js.FinishedAt,
+		toUUID(js.ID), toUUID(js.JobID), js.Name, js.ExecutionOrder, js.ParallelGroup, js.Status, js.CreatedAt, js.StartedAt, js.FinishedAt,
 	)
 	return err
 }
 
-func (s *JobStepStore) GetByID(ctx context.Context, id uuid.UUID) (*store.JobStep, error) {
+func (s *JobStepStore) GetByID(ctx context.Context, id store.JobStepID) (*store.JobStep, error) {
 	var js store.JobStep
+	var idRaw, jobIDRaw uuid.UUID
 	err := s.pool.QueryRow(ctx,
 		`SELECT id, job_id, name, execution_order, parallel_group, status, created_at, started_at, finished_at
-		 FROM job_steps WHERE id = $1`, id,
-	).Scan(&js.ID, &js.JobID, &js.Name, &js.ExecutionOrder, &js.ParallelGroup, &js.Status, &js.CreatedAt, &js.StartedAt, &js.FinishedAt)
+		 FROM job_steps WHERE id = $1`, toUUID(id),
+	).Scan(&idRaw, &jobIDRaw, &js.Name, &js.ExecutionOrder, &js.ParallelGroup, &js.Status, &js.CreatedAt, &js.StartedAt, &js.FinishedAt)
 	if err != nil {
 		return nil, wrapNoRowsByID("job step", id, err)
 	}
+	js.ID = store.JobStepID(idRaw)
+	js.JobID = store.JobID(jobIDRaw)
 	return &js, nil
 }
 
-func (s *JobStepStore) ListByJob(ctx context.Context, jobID uuid.UUID) ([]store.JobStep, error) {
+func (s *JobStepStore) ListByJob(ctx context.Context, jobID store.JobID) ([]store.JobStep, error) {
 	rows, err := s.pool.Query(ctx,
 		`SELECT id, job_id, name, execution_order, parallel_group, status, created_at, started_at, finished_at
-		 FROM job_steps WHERE job_id = $1 ORDER BY created_at`, jobID,
+		 FROM job_steps WHERE job_id = $1 ORDER BY created_at`, toUUID(jobID),
 	)
 	if err != nil {
 		return nil, err
@@ -57,15 +60,18 @@ func (s *JobStepStore) ListByJob(ctx context.Context, jobID uuid.UUID) ([]store.
 	var steps []store.JobStep
 	for rows.Next() {
 		var js store.JobStep
-		if err := rows.Scan(&js.ID, &js.JobID, &js.Name, &js.ExecutionOrder, &js.ParallelGroup, &js.Status, &js.CreatedAt, &js.StartedAt, &js.FinishedAt); err != nil {
+		var idRaw, jobIDRaw uuid.UUID
+		if err := rows.Scan(&idRaw, &jobIDRaw, &js.Name, &js.ExecutionOrder, &js.ParallelGroup, &js.Status, &js.CreatedAt, &js.StartedAt, &js.FinishedAt); err != nil {
 			return nil, err
 		}
+		js.ID = store.JobStepID(idRaw)
+		js.JobID = store.JobID(jobIDRaw)
 		steps = append(steps, js)
 	}
 	return steps, rows.Err()
 }
 
-func (s *JobStepStore) UpdateStatus(ctx context.Context, id uuid.UUID, status string) error {
+func (s *JobStepStore) UpdateStatus(ctx context.Context, id store.JobStepID, status string) error {
 	now := time.Now()
 	startedAt, finishedAt := startedFinishedForStatus(status, now)
 
@@ -75,7 +81,7 @@ func (s *JobStepStore) UpdateStatus(ctx context.Context, id uuid.UUID, status st
 		     started_at = COALESCE($2, started_at),
 		     finished_at = COALESCE($3, finished_at)
 		 WHERE id = $4`,
-		status, startedAt, finishedAt, id,
+		status, startedAt, finishedAt, toUUID(id),
 	)
 	if err != nil {
 		return err

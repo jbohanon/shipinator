@@ -25,27 +25,30 @@ func (s *ArtifactStore) Create(ctx context.Context, a *store.Artifact) error {
 	_, err := s.pool.Exec(ctx,
 		`INSERT INTO artifacts (id, job_id, artifact_type, storage_backend, storage_path, checksum, created_at)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		a.ID, a.JobID, a.ArtifactType, a.StorageBackend, a.StoragePath, a.Checksum, a.CreatedAt,
+		toUUID(a.ID), toUUID(a.JobID), a.ArtifactType, a.StorageBackend, a.StoragePath, a.Checksum, a.CreatedAt,
 	)
 	return err
 }
 
-func (s *ArtifactStore) GetByID(ctx context.Context, id uuid.UUID) (*store.Artifact, error) {
+func (s *ArtifactStore) GetByID(ctx context.Context, id store.ArtifactID) (*store.Artifact, error) {
 	var a store.Artifact
+	var idRaw, jobIDRaw uuid.UUID
 	err := s.pool.QueryRow(ctx,
 		`SELECT id, job_id, artifact_type, storage_backend, storage_path, checksum, created_at
-		 FROM artifacts WHERE id = $1`, id,
-	).Scan(&a.ID, &a.JobID, &a.ArtifactType, &a.StorageBackend, &a.StoragePath, &a.Checksum, &a.CreatedAt)
+		 FROM artifacts WHERE id = $1`, toUUID(id),
+	).Scan(&idRaw, &jobIDRaw, &a.ArtifactType, &a.StorageBackend, &a.StoragePath, &a.Checksum, &a.CreatedAt)
 	if err != nil {
 		return nil, wrapNoRowsByID("artifact", id, err)
 	}
+	a.ID = store.ArtifactID(idRaw)
+	a.JobID = store.JobID(jobIDRaw)
 	return &a, nil
 }
 
-func (s *ArtifactStore) ListByJob(ctx context.Context, jobID uuid.UUID) ([]store.Artifact, error) {
+func (s *ArtifactStore) ListByJob(ctx context.Context, jobID store.JobID) ([]store.Artifact, error) {
 	rows, err := s.pool.Query(ctx,
 		`SELECT id, job_id, artifact_type, storage_backend, storage_path, checksum, created_at
-		 FROM artifacts WHERE job_id = $1 ORDER BY created_at`, jobID,
+		 FROM artifacts WHERE job_id = $1 ORDER BY created_at`, toUUID(jobID),
 	)
 	if err != nil {
 		return nil, err
@@ -55,9 +58,12 @@ func (s *ArtifactStore) ListByJob(ctx context.Context, jobID uuid.UUID) ([]store
 	var artifacts []store.Artifact
 	for rows.Next() {
 		var a store.Artifact
-		if err := rows.Scan(&a.ID, &a.JobID, &a.ArtifactType, &a.StorageBackend, &a.StoragePath, &a.Checksum, &a.CreatedAt); err != nil {
+		var idRaw, jobIDRaw uuid.UUID
+		if err := rows.Scan(&idRaw, &jobIDRaw, &a.ArtifactType, &a.StorageBackend, &a.StoragePath, &a.Checksum, &a.CreatedAt); err != nil {
 			return nil, err
 		}
+		a.ID = store.ArtifactID(idRaw)
+		a.JobID = store.JobID(jobIDRaw)
 		artifacts = append(artifacts, a)
 	}
 	return artifacts, rows.Err()

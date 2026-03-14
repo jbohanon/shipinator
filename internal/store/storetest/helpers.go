@@ -97,12 +97,12 @@ func NewTestPool(t *testing.T) *pgxpool.Pool {
 
 // EntityChain holds IDs for a full entity hierarchy created by CreateEntityChain.
 type EntityChain struct {
-	ProjectID     uuid.UUID
-	RepositoryID  uuid.UUID
-	PipelineID    uuid.UUID
-	PipelineRunID uuid.UUID
-	JobID         uuid.UUID
-	JobStepID     uuid.UUID
+	ProjectID     store.ProjectID
+	RepositoryID  store.RepositoryID
+	PipelineID    store.PipelineID
+	PipelineRunID store.PipelineRunID
+	JobID         store.JobID
+	JobStepID     store.JobStepID
 }
 
 // CreateEntityChain creates a full entity hierarchy (project -> repository ->

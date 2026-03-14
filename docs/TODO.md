@@ -40,11 +40,11 @@
 
 ## Phase 6: Subsystem Implementations (Buildinator, Testinator, Deployinator)
 
-15. **Implement Buildinator** — Translate build steps from `.shipinator.yaml` into `ExecutionSpec`s. Submit them to the Executor. On completion, register produced artifacts in the store. Handle Go binary, OCI image, and Helm chart build outputs.
+15. ~~**Implement Buildinator** — Translate build steps from `.shipinator.yaml` into `ExecutionSpec`s. Submit them to the Executor. On completion, register produced artifacts in the store. Handle Go binary, OCI image, and Helm chart build outputs.~~ ✅
 
-16. **Implement Testinator** — Translate test steps into `ExecutionSpec`s. Support sequential and parallel step groups (use `parallel_group` from the schema). Collect test result artifacts (coverage reports, etc.).
+16. ~~**Implement Testinator** — Translate test steps into `ExecutionSpec`s. Support sequential and parallel step groups. Parallel logic moved from orchestrator into testinator.~~ ✅
 
-17. **Implement Deployinator** — Accept artifact references (never source). Translate deploy config into `ExecutionSpec`s that run `helm install` or `kubectl apply` inside the executor. Target a local K8s cluster for v1.
+17. ~~**Implement Deployinator** — Accept artifact references (never source). Looks up artifact by type from the build job's store records and translates deploy config into `ExecutionSpec`s that run `helm upgrade` or `kubectl apply`.~~ ✅
 
 ## Phase 7: API Layer
 
