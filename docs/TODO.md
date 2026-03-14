@@ -34,9 +34,9 @@
 
 ## Phase 5: Artifact Storage
 
-13. **Define the ArtifactStore interface** — `Put(ctx, artifact) (ref, error)` and `Get(ctx, ref) (io.ReadCloser, error)` in an `artifact` package. Create a mock for this interface for use in tests using gomock, mirroring the existing mock generation.
+13. ~~**Define the ArtifactStore interface** — `Put(ctx, artifact) (ref, error)` and `Get(ctx, ref) (io.ReadCloser, error)` in an `artifact` package. Create a mock for this interface for use in tests using gomock, mirroring the existing mock generation.~~ ✅
 
-14. **Implement the NFS-backed ArtifactStore** — Use the flat `/<artifact-id>/payload` + `metadata.json` layout from the DMD. Write to a configurable base path. Write tests.
+14. ~~**Implement the filesystem-backed ArtifactStore** — Use the flat `/<artifact-id>/payload` + `metadata.json` layout from the DMD. Write to a configurable base path; backend label is a constructor parameter so NFS, S3, etc. are operational concerns. Write tests.~~ ✅
 
 ## Phase 6: Subsystem Implementations (Buildinator, Testinator, Deployinator)
 
