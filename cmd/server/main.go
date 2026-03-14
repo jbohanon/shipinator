@@ -12,6 +12,9 @@ import (
 
 	"git.nonahob.net/jacob/golibs/datastores/sql/migrate"
 	"git.nonahob.net/jacob/golibs/datastores/sql/postgres"
+	"git.nonahob.net/jacob/shipinator/internal/artifact"
+	artifactfs "git.nonahob.net/jacob/shipinator/internal/artifact/filesystem"
+	apiserver "git.nonahob.net/jacob/shipinator/internal/server"
 	"git.nonahob.net/jacob/shipinator/internal/server/config"
 	pgstore "git.nonahob.net/jacob/shipinator/internal/store/postgres"
 	"github.com/labstack/echo/v4"
@@ -63,14 +66,21 @@ func main() {
 	defer postgres.ClosePool(pool)
 
 	// Construct store layer.
-	_ = pgstore.NewProjectStore(pool)
-	_ = pgstore.NewRepositoryStore(pool)
-	_ = pgstore.NewPipelineStore(pool)
-	_ = pgstore.NewPipelineRunStore(pool)
-	_ = pgstore.NewJobStore(pool)
-	_ = pgstore.NewJobStepStore(pool)
-	_ = pgstore.NewArtifactStore(pool)
-	_ = pgstore.NewExecutionStore(pool)
+	pipelineStore := pgstore.NewPipelineStore(pool)
+	pipelineRunStore := pgstore.NewPipelineRunStore(pool)
+	jobStore := pgstore.NewJobStore(pool)
+	artifactStore := pgstore.NewArtifactStore(pool)
+	executionStore := pgstore.NewExecutionStore(pool)
+
+	artifactBytesStore := artifactfs.New(artifact.BackendNFS, cfg.ArtifactPath)
+	api := apiserver.New(
+		pipelineStore,
+		pipelineRunStore,
+		jobStore,
+		artifactStore,
+		executionStore,
+		artifactBytesStore,
+	)
 
 	e := echo.New()
 	e.HideBanner = true
@@ -79,6 +89,7 @@ func main() {
 	e.GET("/healthz", func(c echo.Context) error {
 		return c.String(http.StatusOK, "ok")
 	})
+	api.RegisterRoutes(e)
 
 	go func() {
 		slog.Info("server starting", "addr", cfg.ListenAddr)

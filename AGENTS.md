@@ -119,16 +119,23 @@ Use `google.api.http` options on RPCs so grpc-gateway-compatible routing is defi
 **Streaming downloads stay native HTTP.**
 `GET /v1/artifacts/{id}/download` should be implemented as a streaming Echo handler (`io.Copy` from artifact store reader to response writer). Avoid JSON/base64 artifact payloads for large content.
 
+**Retry and reconciliation safety policy (high level).**
+- Retry means "create a new pipeline run", not in-place mutation of an existing run.
+- `cancel` updates persisted state first; executor cancellation propagation follows via reconciler/orchestrator hooks.
+- Only failed/canceled runs are eligible for retry by default; successful runs require explicit manual retrigger.
+- Reconciler owns recovery of ambiguous states (`running` with unknown external outcome) and should converge to terminal state deterministically.
+- Deploy steps must remain idempotent at the worker command layer (desired-state apply/upgrade semantics).
+
 ---
 
 ## What's done and what's next
 
 Phases 1–6 are complete (see `docs/TODO.md` for the full list). In Phase 7:
 - Protobuf API contract is implemented in `api/v1/shipinator.proto` and generated for Go (`api/v1/shipinator.pb.go`, `api/v1/shipinator_grpc.pb.go`)
-- Next: implement HTTP handlers (trigger run, get status, list jobs, artifact metadata/download, executor callback)
-- Then wire handlers, stores, executor, subsystems, and orchestrator in `cmd/server/main.go`
+- HTTP handlers are implemented for trigger/cancel/retry run control, run and job read APIs, artifact metadata/download, and executor callback
+- Next: finish full runtime wiring in `cmd/server/main.go` by composing executor + orchestrator + subsystems and dispatching API-triggered runs through orchestration
 
-Current `cmd/server/main.go` is a stub. The server package and server config exist but are not yet wired to stores or the orchestrator.
+`cmd/server/main.go` now wires DB stores and route registration, but orchestration dispatch and reconciler/cancel propagation are still pending.
 
 ---
 

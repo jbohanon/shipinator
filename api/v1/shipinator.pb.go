@@ -701,6 +701,182 @@ func (x *CreatePipelineRunResponse) GetPipelineRun() *PipelineRun {
 	return nil
 }
 
+type CancelPipelineRunRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PipelineRunId string                 `protobuf:"bytes,1,opt,name=pipeline_run_id,json=pipelineRunId,proto3" json:"pipeline_run_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelPipelineRunRequest) Reset() {
+	*x = CancelPipelineRunRequest{}
+	mi := &file_shipinator_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelPipelineRunRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelPipelineRunRequest) ProtoMessage() {}
+
+func (x *CancelPipelineRunRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_shipinator_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelPipelineRunRequest.ProtoReflect.Descriptor instead.
+func (*CancelPipelineRunRequest) Descriptor() ([]byte, []int) {
+	return file_shipinator_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CancelPipelineRunRequest) GetPipelineRunId() string {
+	if x != nil {
+		return x.PipelineRunId
+	}
+	return ""
+}
+
+type CancelPipelineRunResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PipelineRun   *PipelineRun           `protobuf:"bytes,1,opt,name=pipeline_run,json=pipelineRun,proto3" json:"pipeline_run,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelPipelineRunResponse) Reset() {
+	*x = CancelPipelineRunResponse{}
+	mi := &file_shipinator_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelPipelineRunResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelPipelineRunResponse) ProtoMessage() {}
+
+func (x *CancelPipelineRunResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_shipinator_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelPipelineRunResponse.ProtoReflect.Descriptor instead.
+func (*CancelPipelineRunResponse) Descriptor() ([]byte, []int) {
+	return file_shipinator_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CancelPipelineRunResponse) GetPipelineRun() *PipelineRun {
+	if x != nil {
+		return x.PipelineRun
+	}
+	return nil
+}
+
+type RetryPipelineRunRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PipelineRunId string                 `protobuf:"bytes,1,opt,name=pipeline_run_id,json=pipelineRunId,proto3" json:"pipeline_run_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RetryPipelineRunRequest) Reset() {
+	*x = RetryPipelineRunRequest{}
+	mi := &file_shipinator_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RetryPipelineRunRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RetryPipelineRunRequest) ProtoMessage() {}
+
+func (x *RetryPipelineRunRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_shipinator_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RetryPipelineRunRequest.ProtoReflect.Descriptor instead.
+func (*RetryPipelineRunRequest) Descriptor() ([]byte, []int) {
+	return file_shipinator_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *RetryPipelineRunRequest) GetPipelineRunId() string {
+	if x != nil {
+		return x.PipelineRunId
+	}
+	return ""
+}
+
+type RetryPipelineRunResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PipelineRun   *PipelineRun           `protobuf:"bytes,1,opt,name=pipeline_run,json=pipelineRun,proto3" json:"pipeline_run,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RetryPipelineRunResponse) Reset() {
+	*x = RetryPipelineRunResponse{}
+	mi := &file_shipinator_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RetryPipelineRunResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RetryPipelineRunResponse) ProtoMessage() {}
+
+func (x *RetryPipelineRunResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_shipinator_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RetryPipelineRunResponse.ProtoReflect.Descriptor instead.
+func (*RetryPipelineRunResponse) Descriptor() ([]byte, []int) {
+	return file_shipinator_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *RetryPipelineRunResponse) GetPipelineRun() *PipelineRun {
+	if x != nil {
+		return x.PipelineRun
+	}
+	return nil
+}
+
 type GetPipelineRunRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PipelineRunId string                 `protobuf:"bytes,1,opt,name=pipeline_run_id,json=pipelineRunId,proto3" json:"pipeline_run_id,omitempty"`
@@ -710,7 +886,7 @@ type GetPipelineRunRequest struct {
 
 func (x *GetPipelineRunRequest) Reset() {
 	*x = GetPipelineRunRequest{}
-	mi := &file_shipinator_proto_msgTypes[5]
+	mi := &file_shipinator_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -722,7 +898,7 @@ func (x *GetPipelineRunRequest) String() string {
 func (*GetPipelineRunRequest) ProtoMessage() {}
 
 func (x *GetPipelineRunRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shipinator_proto_msgTypes[5]
+	mi := &file_shipinator_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -735,7 +911,7 @@ func (x *GetPipelineRunRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPipelineRunRequest.ProtoReflect.Descriptor instead.
 func (*GetPipelineRunRequest) Descriptor() ([]byte, []int) {
-	return file_shipinator_proto_rawDescGZIP(), []int{5}
+	return file_shipinator_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetPipelineRunRequest) GetPipelineRunId() string {
@@ -754,7 +930,7 @@ type GetPipelineRunResponse struct {
 
 func (x *GetPipelineRunResponse) Reset() {
 	*x = GetPipelineRunResponse{}
-	mi := &file_shipinator_proto_msgTypes[6]
+	mi := &file_shipinator_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -766,7 +942,7 @@ func (x *GetPipelineRunResponse) String() string {
 func (*GetPipelineRunResponse) ProtoMessage() {}
 
 func (x *GetPipelineRunResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shipinator_proto_msgTypes[6]
+	mi := &file_shipinator_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -779,7 +955,7 @@ func (x *GetPipelineRunResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPipelineRunResponse.ProtoReflect.Descriptor instead.
 func (*GetPipelineRunResponse) Descriptor() ([]byte, []int) {
-	return file_shipinator_proto_rawDescGZIP(), []int{6}
+	return file_shipinator_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetPipelineRunResponse) GetPipelineRun() *PipelineRun {
@@ -798,7 +974,7 @@ type ListPipelineRunJobsRequest struct {
 
 func (x *ListPipelineRunJobsRequest) Reset() {
 	*x = ListPipelineRunJobsRequest{}
-	mi := &file_shipinator_proto_msgTypes[7]
+	mi := &file_shipinator_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -810,7 +986,7 @@ func (x *ListPipelineRunJobsRequest) String() string {
 func (*ListPipelineRunJobsRequest) ProtoMessage() {}
 
 func (x *ListPipelineRunJobsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shipinator_proto_msgTypes[7]
+	mi := &file_shipinator_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -823,7 +999,7 @@ func (x *ListPipelineRunJobsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPipelineRunJobsRequest.ProtoReflect.Descriptor instead.
 func (*ListPipelineRunJobsRequest) Descriptor() ([]byte, []int) {
-	return file_shipinator_proto_rawDescGZIP(), []int{7}
+	return file_shipinator_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListPipelineRunJobsRequest) GetPipelineRunId() string {
@@ -842,7 +1018,7 @@ type ListPipelineRunJobsResponse struct {
 
 func (x *ListPipelineRunJobsResponse) Reset() {
 	*x = ListPipelineRunJobsResponse{}
-	mi := &file_shipinator_proto_msgTypes[8]
+	mi := &file_shipinator_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -854,7 +1030,7 @@ func (x *ListPipelineRunJobsResponse) String() string {
 func (*ListPipelineRunJobsResponse) ProtoMessage() {}
 
 func (x *ListPipelineRunJobsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shipinator_proto_msgTypes[8]
+	mi := &file_shipinator_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -867,7 +1043,7 @@ func (x *ListPipelineRunJobsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPipelineRunJobsResponse.ProtoReflect.Descriptor instead.
 func (*ListPipelineRunJobsResponse) Descriptor() ([]byte, []int) {
-	return file_shipinator_proto_rawDescGZIP(), []int{8}
+	return file_shipinator_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ListPipelineRunJobsResponse) GetJobs() []*Job {
@@ -886,7 +1062,7 @@ type GetArtifactMetadataRequest struct {
 
 func (x *GetArtifactMetadataRequest) Reset() {
 	*x = GetArtifactMetadataRequest{}
-	mi := &file_shipinator_proto_msgTypes[9]
+	mi := &file_shipinator_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -898,7 +1074,7 @@ func (x *GetArtifactMetadataRequest) String() string {
 func (*GetArtifactMetadataRequest) ProtoMessage() {}
 
 func (x *GetArtifactMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shipinator_proto_msgTypes[9]
+	mi := &file_shipinator_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -911,7 +1087,7 @@ func (x *GetArtifactMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetArtifactMetadataRequest.ProtoReflect.Descriptor instead.
 func (*GetArtifactMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_shipinator_proto_rawDescGZIP(), []int{9}
+	return file_shipinator_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetArtifactMetadataRequest) GetArtifactId() string {
@@ -930,7 +1106,7 @@ type GetArtifactMetadataResponse struct {
 
 func (x *GetArtifactMetadataResponse) Reset() {
 	*x = GetArtifactMetadataResponse{}
-	mi := &file_shipinator_proto_msgTypes[10]
+	mi := &file_shipinator_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -942,7 +1118,7 @@ func (x *GetArtifactMetadataResponse) String() string {
 func (*GetArtifactMetadataResponse) ProtoMessage() {}
 
 func (x *GetArtifactMetadataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shipinator_proto_msgTypes[10]
+	mi := &file_shipinator_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -955,7 +1131,7 @@ func (x *GetArtifactMetadataResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetArtifactMetadataResponse.ProtoReflect.Descriptor instead.
 func (*GetArtifactMetadataResponse) Descriptor() ([]byte, []int) {
-	return file_shipinator_proto_rawDescGZIP(), []int{10}
+	return file_shipinator_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *GetArtifactMetadataResponse) GetArtifact() *Artifact {
@@ -974,7 +1150,7 @@ type DownloadArtifactRequest struct {
 
 func (x *DownloadArtifactRequest) Reset() {
 	*x = DownloadArtifactRequest{}
-	mi := &file_shipinator_proto_msgTypes[11]
+	mi := &file_shipinator_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -986,7 +1162,7 @@ func (x *DownloadArtifactRequest) String() string {
 func (*DownloadArtifactRequest) ProtoMessage() {}
 
 func (x *DownloadArtifactRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shipinator_proto_msgTypes[11]
+	mi := &file_shipinator_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -999,7 +1175,7 @@ func (x *DownloadArtifactRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadArtifactRequest.ProtoReflect.Descriptor instead.
 func (*DownloadArtifactRequest) Descriptor() ([]byte, []int) {
-	return file_shipinator_proto_rawDescGZIP(), []int{11}
+	return file_shipinator_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *DownloadArtifactRequest) GetArtifactId() string {
@@ -1020,7 +1196,7 @@ type DownloadArtifactResponse struct {
 
 func (x *DownloadArtifactResponse) Reset() {
 	*x = DownloadArtifactResponse{}
-	mi := &file_shipinator_proto_msgTypes[12]
+	mi := &file_shipinator_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1032,7 +1208,7 @@ func (x *DownloadArtifactResponse) String() string {
 func (*DownloadArtifactResponse) ProtoMessage() {}
 
 func (x *DownloadArtifactResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shipinator_proto_msgTypes[12]
+	mi := &file_shipinator_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1045,7 +1221,7 @@ func (x *DownloadArtifactResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadArtifactResponse.ProtoReflect.Descriptor instead.
 func (*DownloadArtifactResponse) Descriptor() ([]byte, []int) {
-	return file_shipinator_proto_rawDescGZIP(), []int{12}
+	return file_shipinator_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *DownloadArtifactResponse) GetPayload() []byte {
@@ -1085,7 +1261,7 @@ type ReportExecutionStatusRequest struct {
 
 func (x *ReportExecutionStatusRequest) Reset() {
 	*x = ReportExecutionStatusRequest{}
-	mi := &file_shipinator_proto_msgTypes[13]
+	mi := &file_shipinator_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1097,7 +1273,7 @@ func (x *ReportExecutionStatusRequest) String() string {
 func (*ReportExecutionStatusRequest) ProtoMessage() {}
 
 func (x *ReportExecutionStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shipinator_proto_msgTypes[13]
+	mi := &file_shipinator_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1110,7 +1286,7 @@ func (x *ReportExecutionStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReportExecutionStatusRequest.ProtoReflect.Descriptor instead.
 func (*ReportExecutionStatusRequest) Descriptor() ([]byte, []int) {
-	return file_shipinator_proto_rawDescGZIP(), []int{13}
+	return file_shipinator_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ReportExecutionStatusRequest) GetExecutionId() string {
@@ -1179,7 +1355,7 @@ type ReportExecutionStatusResponse struct {
 
 func (x *ReportExecutionStatusResponse) Reset() {
 	*x = ReportExecutionStatusResponse{}
-	mi := &file_shipinator_proto_msgTypes[14]
+	mi := &file_shipinator_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1191,7 +1367,7 @@ func (x *ReportExecutionStatusResponse) String() string {
 func (*ReportExecutionStatusResponse) ProtoMessage() {}
 
 func (x *ReportExecutionStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shipinator_proto_msgTypes[14]
+	mi := &file_shipinator_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1204,7 +1380,7 @@ func (x *ReportExecutionStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReportExecutionStatusResponse.ProtoReflect.Descriptor instead.
 func (*ReportExecutionStatusResponse) Descriptor() ([]byte, []int) {
-	return file_shipinator_proto_rawDescGZIP(), []int{14}
+	return file_shipinator_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ReportExecutionStatusResponse) GetExecutionId() string {
@@ -1266,6 +1442,14 @@ const file_shipinator_proto_rawDesc = "" +
 	"\agit_ref\x18\x02 \x01(\tR\x06gitRef\x12\x17\n" +
 	"\agit_sha\x18\x03 \x01(\tR\x06gitSha\"Z\n" +
 	"\x19CreatePipelineRunResponse\x12=\n" +
+	"\fpipeline_run\x18\x01 \x01(\v2\x1a.shipinator.v1.PipelineRunR\vpipelineRun\"B\n" +
+	"\x18CancelPipelineRunRequest\x12&\n" +
+	"\x0fpipeline_run_id\x18\x01 \x01(\tR\rpipelineRunId\"Z\n" +
+	"\x19CancelPipelineRunResponse\x12=\n" +
+	"\fpipeline_run\x18\x01 \x01(\v2\x1a.shipinator.v1.PipelineRunR\vpipelineRun\"A\n" +
+	"\x17RetryPipelineRunRequest\x12&\n" +
+	"\x0fpipeline_run_id\x18\x01 \x01(\tR\rpipelineRunId\"Y\n" +
+	"\x18RetryPipelineRunResponse\x12=\n" +
 	"\fpipeline_run\x18\x01 \x01(\v2\x1a.shipinator.v1.PipelineRunR\vpipelineRun\"?\n" +
 	"\x15GetPipelineRunRequest\x12&\n" +
 	"\x0fpipeline_run_id\x18\x01 \x01(\tR\rpipelineRunId\"W\n" +
@@ -1332,9 +1516,11 @@ const file_shipinator_proto_rawDesc = "" +
 	"\x17CALLBACK_STATUS_RUNNING\x10\x01\x12\x1b\n" +
 	"\x17CALLBACK_STATUS_SUCCESS\x10\x02\x12\x1a\n" +
 	"\x16CALLBACK_STATUS_FAILED\x10\x03\x12\x1c\n" +
-	"\x18CALLBACK_STATUS_CANCELED\x10\x042\xd5\x03\n" +
+	"\x18CALLBACK_STATUS_CANCELED\x10\x042\x91\x06\n" +
 	"\x0fPipelineService\x12\x93\x01\n" +
-	"\x11CreatePipelineRun\x12'.shipinator.v1.CreatePipelineRunRequest\x1a(.shipinator.v1.CreatePipelineRunResponse\"+\x82\xd3\xe4\x93\x02%:\x01*\" /v1/pipelines/{pipeline_id}/runs\x12\x8a\x01\n" +
+	"\x11CreatePipelineRun\x12'.shipinator.v1.CreatePipelineRunRequest\x1a(.shipinator.v1.CreatePipelineRunResponse\"+\x82\xd3\xe4\x93\x02%:\x01*\" /v1/pipelines/{pipeline_id}/runs\x12\x9d\x01\n" +
+	"\x11CancelPipelineRun\x12'.shipinator.v1.CancelPipelineRunRequest\x1a(.shipinator.v1.CancelPipelineRunResponse\"5\x82\xd3\xe4\x93\x02/:\x01*\"*/v1/pipeline-runs/{pipeline_run_id}/cancel\x12\x99\x01\n" +
+	"\x10RetryPipelineRun\x12&.shipinator.v1.RetryPipelineRunRequest\x1a'.shipinator.v1.RetryPipelineRunResponse\"4\x82\xd3\xe4\x93\x02.:\x01*\")/v1/pipeline-runs/{pipeline_run_id}/retry\x12\x8a\x01\n" +
 	"\x0eGetPipelineRun\x12$.shipinator.v1.GetPipelineRunRequest\x1a%.shipinator.v1.GetPipelineRunResponse\"+\x82\xd3\xe4\x93\x02%\x12#/v1/pipeline-runs/{pipeline_run_id}\x12\x9e\x01\n" +
 	"\x13ListPipelineRunJobs\x12).shipinator.v1.ListPipelineRunJobsRequest\x1a*.shipinator.v1.ListPipelineRunJobsResponse\"0\x82\xd3\xe4\x93\x02*\x12(/v1/pipeline-runs/{pipeline_run_id}/jobs2\xc2\x02\n" +
 	"\x0fArtifactService\x12\x9a\x01\n" +
@@ -1356,7 +1542,7 @@ func file_shipinator_proto_rawDescGZIP() []byte {
 }
 
 var file_shipinator_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_shipinator_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_shipinator_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_shipinator_proto_goTypes = []any{
 	(PipelineRunStatus)(0),                // 0: shipinator.v1.PipelineRunStatus
 	(JobType)(0),                          // 1: shipinator.v1.JobType
@@ -1368,56 +1554,66 @@ var file_shipinator_proto_goTypes = []any{
 	(*Artifact)(nil),                      // 7: shipinator.v1.Artifact
 	(*CreatePipelineRunRequest)(nil),      // 8: shipinator.v1.CreatePipelineRunRequest
 	(*CreatePipelineRunResponse)(nil),     // 9: shipinator.v1.CreatePipelineRunResponse
-	(*GetPipelineRunRequest)(nil),         // 10: shipinator.v1.GetPipelineRunRequest
-	(*GetPipelineRunResponse)(nil),        // 11: shipinator.v1.GetPipelineRunResponse
-	(*ListPipelineRunJobsRequest)(nil),    // 12: shipinator.v1.ListPipelineRunJobsRequest
-	(*ListPipelineRunJobsResponse)(nil),   // 13: shipinator.v1.ListPipelineRunJobsResponse
-	(*GetArtifactMetadataRequest)(nil),    // 14: shipinator.v1.GetArtifactMetadataRequest
-	(*GetArtifactMetadataResponse)(nil),   // 15: shipinator.v1.GetArtifactMetadataResponse
-	(*DownloadArtifactRequest)(nil),       // 16: shipinator.v1.DownloadArtifactRequest
-	(*DownloadArtifactResponse)(nil),      // 17: shipinator.v1.DownloadArtifactResponse
-	(*ReportExecutionStatusRequest)(nil),  // 18: shipinator.v1.ReportExecutionStatusRequest
-	(*ReportExecutionStatusResponse)(nil), // 19: shipinator.v1.ReportExecutionStatusResponse
-	(*timestamppb.Timestamp)(nil),         // 20: google.protobuf.Timestamp
-	(*wrapperspb.Int32Value)(nil),         // 21: google.protobuf.Int32Value
+	(*CancelPipelineRunRequest)(nil),      // 10: shipinator.v1.CancelPipelineRunRequest
+	(*CancelPipelineRunResponse)(nil),     // 11: shipinator.v1.CancelPipelineRunResponse
+	(*RetryPipelineRunRequest)(nil),       // 12: shipinator.v1.RetryPipelineRunRequest
+	(*RetryPipelineRunResponse)(nil),      // 13: shipinator.v1.RetryPipelineRunResponse
+	(*GetPipelineRunRequest)(nil),         // 14: shipinator.v1.GetPipelineRunRequest
+	(*GetPipelineRunResponse)(nil),        // 15: shipinator.v1.GetPipelineRunResponse
+	(*ListPipelineRunJobsRequest)(nil),    // 16: shipinator.v1.ListPipelineRunJobsRequest
+	(*ListPipelineRunJobsResponse)(nil),   // 17: shipinator.v1.ListPipelineRunJobsResponse
+	(*GetArtifactMetadataRequest)(nil),    // 18: shipinator.v1.GetArtifactMetadataRequest
+	(*GetArtifactMetadataResponse)(nil),   // 19: shipinator.v1.GetArtifactMetadataResponse
+	(*DownloadArtifactRequest)(nil),       // 20: shipinator.v1.DownloadArtifactRequest
+	(*DownloadArtifactResponse)(nil),      // 21: shipinator.v1.DownloadArtifactResponse
+	(*ReportExecutionStatusRequest)(nil),  // 22: shipinator.v1.ReportExecutionStatusRequest
+	(*ReportExecutionStatusResponse)(nil), // 23: shipinator.v1.ReportExecutionStatusResponse
+	(*timestamppb.Timestamp)(nil),         // 24: google.protobuf.Timestamp
+	(*wrapperspb.Int32Value)(nil),         // 25: google.protobuf.Int32Value
 }
 var file_shipinator_proto_depIdxs = []int32{
 	0,  // 0: shipinator.v1.PipelineRun.status:type_name -> shipinator.v1.PipelineRunStatus
-	20, // 1: shipinator.v1.PipelineRun.created_at:type_name -> google.protobuf.Timestamp
-	20, // 2: shipinator.v1.PipelineRun.started_at:type_name -> google.protobuf.Timestamp
-	20, // 3: shipinator.v1.PipelineRun.finished_at:type_name -> google.protobuf.Timestamp
+	24, // 1: shipinator.v1.PipelineRun.created_at:type_name -> google.protobuf.Timestamp
+	24, // 2: shipinator.v1.PipelineRun.started_at:type_name -> google.protobuf.Timestamp
+	24, // 3: shipinator.v1.PipelineRun.finished_at:type_name -> google.protobuf.Timestamp
 	1,  // 4: shipinator.v1.Job.job_type:type_name -> shipinator.v1.JobType
 	2,  // 5: shipinator.v1.Job.status:type_name -> shipinator.v1.JobStatus
-	20, // 6: shipinator.v1.Job.created_at:type_name -> google.protobuf.Timestamp
-	20, // 7: shipinator.v1.Job.started_at:type_name -> google.protobuf.Timestamp
-	20, // 8: shipinator.v1.Job.finished_at:type_name -> google.protobuf.Timestamp
-	20, // 9: shipinator.v1.Artifact.created_at:type_name -> google.protobuf.Timestamp
+	24, // 6: shipinator.v1.Job.created_at:type_name -> google.protobuf.Timestamp
+	24, // 7: shipinator.v1.Job.started_at:type_name -> google.protobuf.Timestamp
+	24, // 8: shipinator.v1.Job.finished_at:type_name -> google.protobuf.Timestamp
+	24, // 9: shipinator.v1.Artifact.created_at:type_name -> google.protobuf.Timestamp
 	5,  // 10: shipinator.v1.CreatePipelineRunResponse.pipeline_run:type_name -> shipinator.v1.PipelineRun
-	5,  // 11: shipinator.v1.GetPipelineRunResponse.pipeline_run:type_name -> shipinator.v1.PipelineRun
-	6,  // 12: shipinator.v1.ListPipelineRunJobsResponse.jobs:type_name -> shipinator.v1.Job
-	7,  // 13: shipinator.v1.GetArtifactMetadataResponse.artifact:type_name -> shipinator.v1.Artifact
-	4,  // 14: shipinator.v1.ReportExecutionStatusRequest.status:type_name -> shipinator.v1.CallbackStatus
-	21, // 15: shipinator.v1.ReportExecutionStatusRequest.exit_code:type_name -> google.protobuf.Int32Value
-	20, // 16: shipinator.v1.ReportExecutionStatusRequest.started_at:type_name -> google.protobuf.Timestamp
-	20, // 17: shipinator.v1.ReportExecutionStatusRequest.finished_at:type_name -> google.protobuf.Timestamp
-	3,  // 18: shipinator.v1.ReportExecutionStatusResponse.phase:type_name -> shipinator.v1.ExecutionPhase
-	8,  // 19: shipinator.v1.PipelineService.CreatePipelineRun:input_type -> shipinator.v1.CreatePipelineRunRequest
-	10, // 20: shipinator.v1.PipelineService.GetPipelineRun:input_type -> shipinator.v1.GetPipelineRunRequest
-	12, // 21: shipinator.v1.PipelineService.ListPipelineRunJobs:input_type -> shipinator.v1.ListPipelineRunJobsRequest
-	14, // 22: shipinator.v1.ArtifactService.GetArtifactMetadata:input_type -> shipinator.v1.GetArtifactMetadataRequest
-	16, // 23: shipinator.v1.ArtifactService.DownloadArtifact:input_type -> shipinator.v1.DownloadArtifactRequest
-	18, // 24: shipinator.v1.ExecutionService.ReportExecutionStatus:input_type -> shipinator.v1.ReportExecutionStatusRequest
-	9,  // 25: shipinator.v1.PipelineService.CreatePipelineRun:output_type -> shipinator.v1.CreatePipelineRunResponse
-	11, // 26: shipinator.v1.PipelineService.GetPipelineRun:output_type -> shipinator.v1.GetPipelineRunResponse
-	13, // 27: shipinator.v1.PipelineService.ListPipelineRunJobs:output_type -> shipinator.v1.ListPipelineRunJobsResponse
-	15, // 28: shipinator.v1.ArtifactService.GetArtifactMetadata:output_type -> shipinator.v1.GetArtifactMetadataResponse
-	17, // 29: shipinator.v1.ArtifactService.DownloadArtifact:output_type -> shipinator.v1.DownloadArtifactResponse
-	19, // 30: shipinator.v1.ExecutionService.ReportExecutionStatus:output_type -> shipinator.v1.ReportExecutionStatusResponse
-	25, // [25:31] is the sub-list for method output_type
-	19, // [19:25] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	5,  // 11: shipinator.v1.CancelPipelineRunResponse.pipeline_run:type_name -> shipinator.v1.PipelineRun
+	5,  // 12: shipinator.v1.RetryPipelineRunResponse.pipeline_run:type_name -> shipinator.v1.PipelineRun
+	5,  // 13: shipinator.v1.GetPipelineRunResponse.pipeline_run:type_name -> shipinator.v1.PipelineRun
+	6,  // 14: shipinator.v1.ListPipelineRunJobsResponse.jobs:type_name -> shipinator.v1.Job
+	7,  // 15: shipinator.v1.GetArtifactMetadataResponse.artifact:type_name -> shipinator.v1.Artifact
+	4,  // 16: shipinator.v1.ReportExecutionStatusRequest.status:type_name -> shipinator.v1.CallbackStatus
+	25, // 17: shipinator.v1.ReportExecutionStatusRequest.exit_code:type_name -> google.protobuf.Int32Value
+	24, // 18: shipinator.v1.ReportExecutionStatusRequest.started_at:type_name -> google.protobuf.Timestamp
+	24, // 19: shipinator.v1.ReportExecutionStatusRequest.finished_at:type_name -> google.protobuf.Timestamp
+	3,  // 20: shipinator.v1.ReportExecutionStatusResponse.phase:type_name -> shipinator.v1.ExecutionPhase
+	8,  // 21: shipinator.v1.PipelineService.CreatePipelineRun:input_type -> shipinator.v1.CreatePipelineRunRequest
+	10, // 22: shipinator.v1.PipelineService.CancelPipelineRun:input_type -> shipinator.v1.CancelPipelineRunRequest
+	12, // 23: shipinator.v1.PipelineService.RetryPipelineRun:input_type -> shipinator.v1.RetryPipelineRunRequest
+	14, // 24: shipinator.v1.PipelineService.GetPipelineRun:input_type -> shipinator.v1.GetPipelineRunRequest
+	16, // 25: shipinator.v1.PipelineService.ListPipelineRunJobs:input_type -> shipinator.v1.ListPipelineRunJobsRequest
+	18, // 26: shipinator.v1.ArtifactService.GetArtifactMetadata:input_type -> shipinator.v1.GetArtifactMetadataRequest
+	20, // 27: shipinator.v1.ArtifactService.DownloadArtifact:input_type -> shipinator.v1.DownloadArtifactRequest
+	22, // 28: shipinator.v1.ExecutionService.ReportExecutionStatus:input_type -> shipinator.v1.ReportExecutionStatusRequest
+	9,  // 29: shipinator.v1.PipelineService.CreatePipelineRun:output_type -> shipinator.v1.CreatePipelineRunResponse
+	11, // 30: shipinator.v1.PipelineService.CancelPipelineRun:output_type -> shipinator.v1.CancelPipelineRunResponse
+	13, // 31: shipinator.v1.PipelineService.RetryPipelineRun:output_type -> shipinator.v1.RetryPipelineRunResponse
+	15, // 32: shipinator.v1.PipelineService.GetPipelineRun:output_type -> shipinator.v1.GetPipelineRunResponse
+	17, // 33: shipinator.v1.PipelineService.ListPipelineRunJobs:output_type -> shipinator.v1.ListPipelineRunJobsResponse
+	19, // 34: shipinator.v1.ArtifactService.GetArtifactMetadata:output_type -> shipinator.v1.GetArtifactMetadataResponse
+	21, // 35: shipinator.v1.ArtifactService.DownloadArtifact:output_type -> shipinator.v1.DownloadArtifactResponse
+	23, // 36: shipinator.v1.ExecutionService.ReportExecutionStatus:output_type -> shipinator.v1.ReportExecutionStatusResponse
+	29, // [29:37] is the sub-list for method output_type
+	21, // [21:29] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
 func init() { file_shipinator_proto_init() }
@@ -1431,7 +1627,7 @@ func file_shipinator_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_shipinator_proto_rawDesc), len(file_shipinator_proto_rawDesc)),
 			NumEnums:      5,
-			NumMessages:   15,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   3,
 		},

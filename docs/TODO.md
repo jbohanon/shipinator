@@ -50,21 +50,28 @@
 
 18. ~~**Define the protobuf API** — Flesh out `api/v1/shipinator.proto` with messages and services for pipeline control, artifact access, and executor callbacks. Generate Go code.~~ ✅
 
-19. **Implement API handlers** — Wire up the HTTP/gRPC endpoints from the DMD:
+19. ~~**Implement API handlers** — Wire up the HTTP/gRPC endpoints from the DMD:~~ ✅
     - `POST /v1/pipelines/{id}/runs` — trigger a pipeline run
+    - `POST /v1/pipeline-runs/{id}/cancel` — cancel an in-flight run
+    - `POST /v1/pipeline-runs/{id}/retry` — retry a failed/canceled run by creating a new run from the same pipeline/ref
     - `GET /v1/pipeline-runs/{id}` — get run status
     - `GET /v1/pipeline-runs/{id}/jobs` — list jobs in a run
     - `GET /v1/artifacts/{id}/metadata` and `/download`
     - `POST /v1/executions/{id}/status` — executor callback
     - Architecture decision: use grpc-gateway style HTTP mappings in `api/v1/shipinator.proto` for control/metadata APIs, and implement `/v1/artifacts/{id}/download` as native streaming HTTP in Echo (not base64 JSON payloads)
+    - Retry policy: retry creates a new pipeline run (never mutates a prior run in place)
 
 20. **Wire everything together in `cmd/server/main.go`** — Initialize DB, create stores, create executor, create orchestrator, create subsystems, start HTTP server. This is where the modular monolith comes together.
+    - Remaining work: trigger/retry endpoints should dispatch orchestration (initially in-process async), and cancel should propagate to in-flight execution via orchestrator/reconciler integration
 
 ## Phase 8: Server Lifecycle & Reliability
 
 21. **Implement graceful shutdown** — Handle `SIGTERM`/`SIGINT`, drain in-flight requests, and cleanly close DB connections.
 
-22. **Implement crash recovery** — On startup, query for pipeline runs stuck in `RUNNING` state. Re-check executor status and resume or fail them. This is the idempotency guarantee from the TDD.
+22. **Implement crash recovery / reconciler loop** — On startup, query for pipeline runs stuck in `RUNNING` state. Re-check executor status and resume or fail them. Continue with a background reconciliation loop that picks up `PENDING` runs and advances them. This is the idempotency guarantee from the TDD.
+    - Define deterministic convergence rules for ambiguous states (control-plane crash vs executor completion)
+    - Add cancellation propagation from run/job state into active executor handles
+    - Enforce retry eligibility and idempotency-key handling for trigger/retry endpoints
 
 23. **Add structured logging** — Use `slog` or similar. Attach `job_id`, `pipeline_run_id`, `stage_type` to log entries. Link logs via `logs_ref`.
 

@@ -20,6 +20,8 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	PipelineService_CreatePipelineRun_FullMethodName   = "/shipinator.v1.PipelineService/CreatePipelineRun"
+	PipelineService_CancelPipelineRun_FullMethodName   = "/shipinator.v1.PipelineService/CancelPipelineRun"
+	PipelineService_RetryPipelineRun_FullMethodName    = "/shipinator.v1.PipelineService/RetryPipelineRun"
 	PipelineService_GetPipelineRun_FullMethodName      = "/shipinator.v1.PipelineService/GetPipelineRun"
 	PipelineService_ListPipelineRunJobs_FullMethodName = "/shipinator.v1.PipelineService/ListPipelineRunJobs"
 )
@@ -32,6 +34,10 @@ const (
 type PipelineServiceClient interface {
 	// CreatePipelineRun maps to POST /v1/pipelines/{id}/runs.
 	CreatePipelineRun(ctx context.Context, in *CreatePipelineRunRequest, opts ...grpc.CallOption) (*CreatePipelineRunResponse, error)
+	// CancelPipelineRun maps to POST /v1/pipeline-runs/{id}/cancel.
+	CancelPipelineRun(ctx context.Context, in *CancelPipelineRunRequest, opts ...grpc.CallOption) (*CancelPipelineRunResponse, error)
+	// RetryPipelineRun maps to POST /v1/pipeline-runs/{id}/retry.
+	RetryPipelineRun(ctx context.Context, in *RetryPipelineRunRequest, opts ...grpc.CallOption) (*RetryPipelineRunResponse, error)
 	// GetPipelineRun maps to GET /v1/pipeline-runs/{id}.
 	GetPipelineRun(ctx context.Context, in *GetPipelineRunRequest, opts ...grpc.CallOption) (*GetPipelineRunResponse, error)
 	// ListPipelineRunJobs maps to GET /v1/pipeline-runs/{id}/jobs.
@@ -50,6 +56,26 @@ func (c *pipelineServiceClient) CreatePipelineRun(ctx context.Context, in *Creat
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreatePipelineRunResponse)
 	err := c.cc.Invoke(ctx, PipelineService_CreatePipelineRun_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pipelineServiceClient) CancelPipelineRun(ctx context.Context, in *CancelPipelineRunRequest, opts ...grpc.CallOption) (*CancelPipelineRunResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CancelPipelineRunResponse)
+	err := c.cc.Invoke(ctx, PipelineService_CancelPipelineRun_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pipelineServiceClient) RetryPipelineRun(ctx context.Context, in *RetryPipelineRunRequest, opts ...grpc.CallOption) (*RetryPipelineRunResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RetryPipelineRunResponse)
+	err := c.cc.Invoke(ctx, PipelineService_RetryPipelineRun_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +110,10 @@ func (c *pipelineServiceClient) ListPipelineRunJobs(ctx context.Context, in *Lis
 type PipelineServiceServer interface {
 	// CreatePipelineRun maps to POST /v1/pipelines/{id}/runs.
 	CreatePipelineRun(context.Context, *CreatePipelineRunRequest) (*CreatePipelineRunResponse, error)
+	// CancelPipelineRun maps to POST /v1/pipeline-runs/{id}/cancel.
+	CancelPipelineRun(context.Context, *CancelPipelineRunRequest) (*CancelPipelineRunResponse, error)
+	// RetryPipelineRun maps to POST /v1/pipeline-runs/{id}/retry.
+	RetryPipelineRun(context.Context, *RetryPipelineRunRequest) (*RetryPipelineRunResponse, error)
 	// GetPipelineRun maps to GET /v1/pipeline-runs/{id}.
 	GetPipelineRun(context.Context, *GetPipelineRunRequest) (*GetPipelineRunResponse, error)
 	// ListPipelineRunJobs maps to GET /v1/pipeline-runs/{id}/jobs.
@@ -100,6 +130,12 @@ type UnimplementedPipelineServiceServer struct{}
 
 func (UnimplementedPipelineServiceServer) CreatePipelineRun(context.Context, *CreatePipelineRunRequest) (*CreatePipelineRunResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreatePipelineRun not implemented")
+}
+func (UnimplementedPipelineServiceServer) CancelPipelineRun(context.Context, *CancelPipelineRunRequest) (*CancelPipelineRunResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CancelPipelineRun not implemented")
+}
+func (UnimplementedPipelineServiceServer) RetryPipelineRun(context.Context, *RetryPipelineRunRequest) (*RetryPipelineRunResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RetryPipelineRun not implemented")
 }
 func (UnimplementedPipelineServiceServer) GetPipelineRun(context.Context, *GetPipelineRunRequest) (*GetPipelineRunResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetPipelineRun not implemented")
@@ -142,6 +178,42 @@ func _PipelineService_CreatePipelineRun_Handler(srv interface{}, ctx context.Con
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PipelineServiceServer).CreatePipelineRun(ctx, req.(*CreatePipelineRunRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PipelineService_CancelPipelineRun_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CancelPipelineRunRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PipelineServiceServer).CancelPipelineRun(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PipelineService_CancelPipelineRun_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PipelineServiceServer).CancelPipelineRun(ctx, req.(*CancelPipelineRunRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PipelineService_RetryPipelineRun_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RetryPipelineRunRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PipelineServiceServer).RetryPipelineRun(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PipelineService_RetryPipelineRun_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PipelineServiceServer).RetryPipelineRun(ctx, req.(*RetryPipelineRunRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -192,6 +264,14 @@ var PipelineService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreatePipelineRun",
 			Handler:    _PipelineService_CreatePipelineRun_Handler,
+		},
+		{
+			MethodName: "CancelPipelineRun",
+			Handler:    _PipelineService_CancelPipelineRun_Handler,
+		},
+		{
+			MethodName: "RetryPipelineRun",
+			Handler:    _PipelineService_RetryPipelineRun_Handler,
 		},
 		{
 			MethodName: "GetPipelineRun",

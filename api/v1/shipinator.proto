@@ -17,6 +17,20 @@ service PipelineService {
       body: "*"
     };
   }
+  // CancelPipelineRun maps to POST /v1/pipeline-runs/{id}/cancel.
+  rpc CancelPipelineRun(CancelPipelineRunRequest) returns (CancelPipelineRunResponse) {
+    option (google.api.http) = {
+      post: "/v1/pipeline-runs/{pipeline_run_id}/cancel"
+      body: "*"
+    };
+  }
+  // RetryPipelineRun maps to POST /v1/pipeline-runs/{id}/retry.
+  rpc RetryPipelineRun(RetryPipelineRunRequest) returns (RetryPipelineRunResponse) {
+    option (google.api.http) = {
+      post: "/v1/pipeline-runs/{pipeline_run_id}/retry"
+      body: "*"
+    };
+  }
   // GetPipelineRun maps to GET /v1/pipeline-runs/{id}.
   rpc GetPipelineRun(GetPipelineRunRequest) returns (GetPipelineRunResponse) {
     option (google.api.http) = {
@@ -139,6 +153,22 @@ message CreatePipelineRunRequest {
 }
 
 message CreatePipelineRunResponse {
+  PipelineRun pipeline_run = 1;
+}
+
+message CancelPipelineRunRequest {
+  string pipeline_run_id = 1;
+}
+
+message CancelPipelineRunResponse {
+  PipelineRun pipeline_run = 1;
+}
+
+message RetryPipelineRunRequest {
+  string pipeline_run_id = 1;
+}
+
+message RetryPipelineRunResponse {
   PipelineRun pipeline_run = 1;
 }
 
